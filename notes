@@ -4,8 +4,11 @@ Yacc file souces:
         http://www.gnu.org/software/octave/index.html
     GNU Bash
         www.gnu.org/software/bash
-    GCC (contains c, c++, java, bunch of others)
+    GCC 3.3 (contains c, c++, java, objective-c, bunch of others)
         gcc.gnu.org
+    R
+        http://www.r-project.org/
+        
 
 9/30/12
     There does not appear to be a yacc grammar available for python - it looks like making the indentation levels significant is tricky within the context of yacc.  I will save this for later.
