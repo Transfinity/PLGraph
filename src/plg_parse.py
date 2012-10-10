@@ -1,3 +1,5 @@
+#! /bin/env python
+
 import networkx as nx
 import logging
 
@@ -70,7 +72,16 @@ def init_log () :
 def set_log_level(level) :
     log.setLevel(level)
 
+
 init_log()
+if __name__ == '__main__' :
+    import sys
+    if len(sys.argv) < 2 :
+        print 'Usage: plg_parse <path/to/file.plg>'
+
+    set_log_level(logging.WARNING)
+    graph = measure(sys.argv[1])
+
 
 
 
