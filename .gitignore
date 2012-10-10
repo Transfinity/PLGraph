@@ -1,0 +1,11 @@
+# Compiled source #
+###################
+*.pyc
+
+# Swap files #
+##############
+*.swp
+
+# Misc #
+########
+Readings
