@@ -1,43 +1,13 @@
-Graph info for plg file	../graphs/ansi_c.plg
-Number of nodes	350
-Number of edges	2988
-Edge density	8
-Average clustering	0.133268366176
-Average shortest path length	1.41112566517
-Degree correlation coef	0.0484499705463
-Graph info for plg file	../graphs/gcc3.3_java-scan.plg
-Number of nodes	616
-Number of edges	6433
-Edge density	10
-Average clustering	0.132533181124
-Average shortest path length	2.63421497202
-Degree correlation coef	0.0673361348374
-Graph info for plg file	../graphs/gcc3.3_java.plg
-Number of nodes	787
-Number of edges	6940
-Edge density	8
-Average clustering	0.101798536002
-Average shortest path length	2.10983022461
-Degree correlation coef	0.0876182426935
-Graph info for plg file	../graphs/R.plg
-Number of nodes	163
-Number of edges	1763
-Edge density	10
-Average clustering	0.128305110918
-Average shortest path length	1.9842460047
-Degree correlation coef	0.00360171814357
-Graph info for plg file	../graphs/octave.plg
-Number of nodes	499
-Number of edges	4681
-Edge density	9
-Average clustering	0.0953699304911
-Average shortest path length	2.4353284883
-Degree correlation coef	0.0684202133792
-Graph info for plg file	../graphs/gnu_bash.plg
-Number of nodes	334
-Number of edges	1545
-Edge density	4
-Average clustering	0.0481169103315
-Average shortest path length	1.79194763626
-Degree correlation coef	0.515393417094
-
+"Language"	"C"	"Java scan"	"Java full"	"R"	"Octave"	"Bash"	"Perl"	"Awk"	"Ruby"	"Min"	"Max"	"Avg"	"Stddev"
+"Purpose"	"System programming"	"General"	"General"	"Statistics"	"Math"	"Scripting"	"Scripting"	"Scripting"	"General"				
+"Dynamic/Static typing"	"Static"	"Static"	"Static"	"Dynamic"	"Dynamic"	"Dynamic"	"Dynamic"	"None"	"Dynamic"				
+"Object-Oriented"	"No"	"Yes"	"Yes"	"Yes"	"Yes"	"No"	"Yes"	"No"	"Yes"				
+"C-based"	"Yes"	"Yes"	"Yes"	"No"	"No"	"No"	"Yes"	"No"	"No"				
+"Paridigm"	"Imperative"	"Imperative"	"Imperative"	"Mulit"	"Imperative"	"Imperative"	"Multi"	"Event Driven"	"Multi"				
+"Compiled/Interpreted/Both"	"Compiled"	"Compiled"	"Compiled"	"Interpreted"	"Interpreted"	"Interpreted"	"Interpreted"	"Interpreted"	"Interpreted"				
+"Number of nodes"	350	616	787	163	499	334	449	330	991	163	991	502.1111111111	257.8742156772
+"Number of edges"	2988	6433	6940	1763	4681	1545	6275	2497	17561	1545	17561	5631.4444444445	4930.3022754977
+"Edge density"	8	10	8	10	9	4	13	7	17	4	17	9.5555555556	3.7118429086
+"Average clustering"	0.1332683662	0.1325331811	0.101798536	0.1283051109	0.0953699305	0.0481169103	0.1540995017	0.0818747031	0.1053768152	0.0481169103	0.1540995017	0.1089714506	0.0320988881
+"Average shortest path length"	1.4111256652	2.634214972	2.1098302246	1.9842460047	2.4353284883	1.7919476363	3.4998061168	1.2415584416	1.866285458	1.2415584416	3.4998061168	2.1082603342	0.6829310015
+"Degree correlation coef"	0.0484499705	0.0673361348	0.0876182427	0.0036017181	0.0684202134	0.5153934171	0.5757617134	0.2604709544	0.5900450487	0.0036017181	0.5900450487	0.246344157	0.2465294147
