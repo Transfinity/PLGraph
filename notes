@@ -8,7 +8,12 @@ Yacc file souces:
         gcc.gnu.org
     R
         http://www.r-project.org/
-        
+    awk
+        http://www.gnu.org/software/gawk/
+    perl
+        http://www.perl.org/get.html
+    ruby
+        http://www.ruby-lang.org/en/downloads/
 
 9/30/12
     There does not appear to be a yacc grammar available for python - it looks like making the indentation levels significant is tricky within the context of yacc.  I will save this for later.

@@ -1,0 +1,43 @@
+Graph info for plg file	../graphs/ansi_c.plg
+Number of nodes	350
+Number of edges	2988
+Edge density	8
+Average clustering	0.133268366176
+Average shortest path length	1.41112566517
+Degree correlation coef	0.0484499705463
+Graph info for plg file	../graphs/gcc3.3_java-scan.plg
+Number of nodes	616
+Number of edges	6433
+Edge density	10
+Average clustering	0.132533181124
+Average shortest path length	2.63421497202
+Degree correlation coef	0.0673361348374
+Graph info for plg file	../graphs/gcc3.3_java.plg
+Number of nodes	787
+Number of edges	6940
+Edge density	8
+Average clustering	0.101798536002
+Average shortest path length	2.10983022461
+Degree correlation coef	0.0876182426935
+Graph info for plg file	../graphs/R.plg
+Number of nodes	163
+Number of edges	1763
+Edge density	10
+Average clustering	0.128305110918
+Average shortest path length	1.9842460047
+Degree correlation coef	0.00360171814357
+Graph info for plg file	../graphs/octave.plg
+Number of nodes	499
+Number of edges	4681
+Edge density	9
+Average clustering	0.0953699304911
+Average shortest path length	2.4353284883
+Degree correlation coef	0.0684202133792
+Graph info for plg file	../graphs/gnu_bash.plg
+Number of nodes	334
+Number of edges	1545
+Edge density	4
+Average clustering	0.0481169103315
+Average shortest path length	1.79194763626
+Degree correlation coef	0.515393417094
+
