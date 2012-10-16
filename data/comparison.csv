@@ -1,7 +1,7 @@
 Language	C	Java scan	Java full	R	Octave	Bash	Perl	Awk	Ruby	Open Cobol	Q pascal	GNU Pascal	PHP	Min	Max	Avg	Stddev
 Original Release	1973	1995	1995	1993	1988	1989	1987	1977	1995	1959	1970	1970					
 Current Release	1995	2003	2003	2012	2012	2012	2012	2012	2012	2002		2012					
-Purpose	System programming	Applications	Applications	Numeric	Numeric	Scripting	Scripting	Scripting	Applications	Applications	Applications	Applications					
+Purpose	System programming	Applications	Applications	Numeric	Numeric	Scripting	Scripting	Scripting	Applications	Applications	Applications	Applications	Web				
 Dynamic/Static typing	Static	Static	Static	Dynamic	Dynamic	Dynamic	Dynamic	None	Dynamic	Static	Static	Static					
 Object-Oriented	No	Yes	Yes	Yes	Yes	No	Yes	No	Yes	Yes	No	No					
 C-based	Yes	Yes	Yes	No	No	No	Yes	No	No	No	No	No					
