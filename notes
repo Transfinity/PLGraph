@@ -22,6 +22,19 @@ Yacc file souces:
         http://www.moorecad.com/standardpascal/yacclex.html
     GNU Pascal
         http://www.gnu-pascal.de/alpha/
+    PHP
+        http://us2.php.net/downloads.php
+
+Language notes:
+    Fortran
+    
+    Cobol
+        10/16: There seem to be two mainstream implementations of cobol for unix: open cobol and tiny cobol.  Both are written in c and use a yacc-based parser, but only open cobol will compile without issue.  Potential for within-language comparison.
+
+    JavaScript
+        10/16: JS is owned by Mozilla.  I can't find a yacc parser, but there are plenty of grammar specifications available (http://www.antlr.org/grammar/1153976512034/ecmascriptA3.g, http://hepunx.rl.ac.uk/~adye/jsspec11/llr.htm).  Firefox's JS interpreter is called spidermonkey, but doesn't use yacc
+
+General notes:
 
 9/30/12
     There does not appear to be a yacc grammar available for python - it looks like making the indentation levels significant is tricky within the context of yacc.  I will save this for later.
@@ -29,3 +42,6 @@ Yacc file souces:
 10/10/12
     From the internet (http://en.wikibooks.org/wiki/Software_Engineers_Handbook/Language_Dictionary/COBOL#General_Syntax): "the syntax (like other early languages, including FORTRAN) is not designed to follow a formal grammar; for this reason COBOL and FORTRAN parsers are rarely implemented using automatic code generators"
     Fortran plugin for gcc should be in the basic gcc package (on the home pc).  We'll see
+
+10/16/12
+    It looks like Antlr uses LL(1) grammars, wheras YACC/Bison use LALR grammars.  As such, I would not expect a .y file to work for antlr, or a .g file to work with bison.  It might eventually be interesting to look at the difference between the same language implemented in different ways, but for now I'm not going to bother with antlr - it only adds another variable.
