@@ -1,5 +1,5 @@
 Yacc file souces:
-    Octave
+    GNU Octave
         ftp://ftp.gnu.org/gnu/octave/
         http://www.gnu.org/software/octave/index.html
     GNU Bash
@@ -8,8 +8,24 @@ Yacc file souces:
         gcc.gnu.org
     R
         http://www.r-project.org/
-        
+    GNU awk
+        http://www.gnu.org/software/gawk/
+    perl
+        http://www.perl.org/get.html
+    ruby
+        http://www.ruby-lang.org/en/downloads/
+    tiny cobol (doesn't work)
+        http://tiny-cobol.sourceforge.net/download.php
+    open cobol
+        http://www.opencobol.org/modules/mydownloads/
+    Some dude's pascal implementation
+        http://www.moorecad.com/standardpascal/yacclex.html
+    GNU Pascal
+        http://www.gnu-pascal.de/alpha/
 
 9/30/12
     There does not appear to be a yacc grammar available for python - it looks like making the indentation levels significant is tricky within the context of yacc.  I will save this for later.
     
+10/10/12
+    From the internet (http://en.wikibooks.org/wiki/Software_Engineers_Handbook/Language_Dictionary/COBOL#General_Syntax): "the syntax (like other early languages, including FORTRAN) is not designed to follow a formal grammar; for this reason COBOL and FORTRAN parsers are rarely implemented using automatic code generators"
+    Fortran plugin for gcc should be in the basic gcc package (on the home pc).  We'll see

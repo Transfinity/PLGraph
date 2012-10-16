@@ -1,0 +1,5665 @@
+Grammar
+
+    0 $accept: file $end
+
+    1 file: program
+    2     | module
+
+    3 program: program_heading semicolon block DOT
+
+    4 program_heading: PROGRAM identifier
+    5                | PROGRAM identifier LPAREN identifier_list RPAREN
+
+    6 identifier_list: identifier_list comma identifier
+    7                | identifier
+
+    8 block: label_declaration_part constant_definition_part type_definition_part variable_declaration_part procedure_and_function_declaration_part statement_part
+
+    9 module: constant_definition_part type_definition_part variable_declaration_part procedure_and_function_declaration_part
+
+   10 label_declaration_part: LABEL label_list semicolon
+   11                       | /* empty */
+
+   12 label_list: label_list comma label
+   13           | label
+
+   14 label: DIGSEQ
+
+   15 constant_definition_part: CONST constant_list
+   16                         | /* empty */
+
+   17 constant_list: constant_list constant_definition
+   18              | constant_definition
+
+   19 constant_definition: identifier EQUAL cexpression semicolon
+
+   20 cexpression: csimple_expression
+   21            | csimple_expression relop csimple_expression
+
+   22 csimple_expression: cterm
+   23                   | csimple_expression addop cterm
+
+   24 cterm: cfactor
+   25      | cterm mulop cfactor
+
+   26 cfactor: sign cfactor
+   27        | cexponentiation
+
+   28 cexponentiation: cprimary
+   29                | cprimary STARSTAR cexponentiation
+
+   30 cprimary: identifier
+   31         | LPAREN cexpression RPAREN
+   32         | unsigned_constant
+   33         | NOT cprimary
+
+   34 constant: non_string
+   35         | sign non_string
+   36         | CHARACTER_STRING
+
+   37 sign: PLUS
+   38     | MINUS
+
+   39 non_string: DIGSEQ
+   40           | identifier
+   41           | REALNUMBER
+
+   42 type_definition_part: TYPE type_definition_list
+   43                     | /* empty */
+
+   44 type_definition_list: type_definition_list type_definition
+   45                     | type_definition
+
+   46 type_definition: identifier EQUAL type_denoter semicolon
+
+   47 type_denoter: identifier
+   48             | new_type
+
+   49 new_type: new_ordinal_type
+   50         | new_structured_type
+   51         | new_pointer_type
+
+   52 new_ordinal_type: enumerated_type
+   53                 | subrange_type
+
+   54 enumerated_type: LPAREN identifier_list RPAREN
+
+   55 subrange_type: constant DOTDOT constant
+
+   56 new_structured_type: structured_type
+   57                    | PACKED structured_type
+
+   58 structured_type: array_type
+   59                | record_type
+   60                | set_type
+   61                | file_type
+
+   62 array_type: ARRAY LBRAC index_list RBRAC OF component_type
+
+   63 index_list: index_list comma index_type
+   64           | index_type
+
+   65 index_type: ordinal_type
+
+   66 ordinal_type: new_ordinal_type
+   67             | identifier
+
+   68 component_type: type_denoter
+
+   69 record_type: RECORD record_section_list END
+   70            | RECORD record_section_list semicolon variant_part END
+   71            | RECORD variant_part END
+
+   72 record_section_list: record_section_list semicolon record_section
+   73                    | record_section
+
+   74 record_section: identifier_list COLON type_denoter
+
+   75 variant_part: CASE variant_selector OF variant_list semicolon
+   76             | CASE variant_selector OF variant_list
+   77             | /* empty */
+
+   78 variant_selector: tag_field COLON tag_type
+   79                 | tag_type
+
+   80 variant_list: variant_list semicolon variant
+   81             | variant
+
+   82 variant: case_constant_list COLON LPAREN record_section_list RPAREN
+   83        | case_constant_list COLON LPAREN record_section_list semicolon variant_part RPAREN
+   84        | case_constant_list COLON LPAREN variant_part RPAREN
+
+   85 case_constant_list: case_constant_list comma case_constant
+   86                   | case_constant
+
+   87 case_constant: constant
+   88              | constant DOTDOT constant
+
+   89 tag_field: identifier
+
+   90 tag_type: identifier
+
+   91 set_type: SET OF base_type
+
+   92 base_type: ordinal_type
+
+   93 file_type: PFILE OF component_type
+
+   94 new_pointer_type: UPARROW domain_type
+
+   95 domain_type: identifier
+
+   96 variable_declaration_part: VAR variable_declaration_list semicolon
+   97                          | /* empty */
+
+   98 variable_declaration_list: variable_declaration_list semicolon variable_declaration
+   99                          | variable_declaration
+
+  100 variable_declaration: identifier_list COLON type_denoter
+
+  101 procedure_and_function_declaration_part: proc_or_func_declaration_list semicolon
+  102                                        | /* empty */
+
+  103 proc_or_func_declaration_list: proc_or_func_declaration_list semicolon proc_or_func_declaration
+  104                              | proc_or_func_declaration
+
+  105 proc_or_func_declaration: procedure_declaration
+  106                         | function_declaration
+
+  107 procedure_declaration: procedure_heading semicolon directive
+  108                      | procedure_heading semicolon procedure_block
+
+  109 procedure_heading: procedure_identification
+  110                  | procedure_identification formal_parameter_list
+
+  111 directive: FORWARD
+  112          | EXTERNAL
+
+  113 formal_parameter_list: LPAREN formal_parameter_section_list RPAREN
+
+  114 formal_parameter_section_list: formal_parameter_section_list semicolon formal_parameter_section
+  115                              | formal_parameter_section
+
+  116 formal_parameter_section: value_parameter_specification
+  117                         | variable_parameter_specification
+  118                         | procedural_parameter_specification
+  119                         | functional_parameter_specification
+
+  120 value_parameter_specification: identifier_list COLON identifier
+
+  121 variable_parameter_specification: VAR identifier_list COLON identifier
+
+  122 procedural_parameter_specification: procedure_heading
+
+  123 functional_parameter_specification: function_heading
+
+  124 procedure_identification: PROCEDURE identifier
+
+  125 procedure_block: block
+
+  126 function_declaration: function_heading semicolon directive
+  127                     | function_identification semicolon function_block
+  128                     | function_heading semicolon function_block
+
+  129 function_heading: FUNCTION identifier COLON result_type
+  130                 | FUNCTION identifier formal_parameter_list COLON result_type
+
+  131 result_type: identifier
+
+  132 function_identification: FUNCTION identifier
+
+  133 function_block: block
+
+  134 statement_part: compound_statement
+
+  135 compound_statement: PBEGIN statement_sequence END
+
+  136 statement_sequence: statement_sequence semicolon statement
+  137                   | statement
+
+  138 statement: open_statement
+  139          | closed_statement
+
+  140 open_statement: label COLON non_labeled_open_statement
+  141               | non_labeled_open_statement
+
+  142 closed_statement: label COLON non_labeled_closed_statement
+  143                 | non_labeled_closed_statement
+
+  144 non_labeled_closed_statement: assignment_statement
+  145                             | procedure_statement
+  146                             | goto_statement
+  147                             | compound_statement
+  148                             | case_statement
+  149                             | repeat_statement
+  150                             | closed_with_statement
+  151                             | closed_if_statement
+  152                             | closed_while_statement
+  153                             | closed_for_statement
+  154                             | /* empty */
+
+  155 non_labeled_open_statement: open_with_statement
+  156                           | open_if_statement
+  157                           | open_while_statement
+  158                           | open_for_statement
+
+  159 repeat_statement: REPEAT statement_sequence UNTIL boolean_expression
+
+  160 open_while_statement: WHILE boolean_expression DO open_statement
+
+  161 closed_while_statement: WHILE boolean_expression DO closed_statement
+
+  162 open_for_statement: FOR control_variable ASSIGNMENT initial_value direction final_value DO open_statement
+
+  163 closed_for_statement: FOR control_variable ASSIGNMENT initial_value direction final_value DO closed_statement
+
+  164 open_with_statement: WITH record_variable_list DO open_statement
+
+  165 closed_with_statement: WITH record_variable_list DO closed_statement
+
+  166 open_if_statement: IF boolean_expression THEN statement
+  167                  | IF boolean_expression THEN closed_statement ELSE open_statement
+
+  168 closed_if_statement: IF boolean_expression THEN closed_statement ELSE closed_statement
+
+  169 assignment_statement: variable_access ASSIGNMENT expression
+
+  170 variable_access: identifier
+  171                | indexed_variable
+  172                | field_designator
+  173                | variable_access UPARROW
+
+  174 indexed_variable: variable_access LBRAC index_expression_list RBRAC
+
+  175 index_expression_list: index_expression_list comma index_expression
+  176                      | index_expression
+
+  177 index_expression: expression
+
+  178 field_designator: variable_access DOT identifier
+
+  179 procedure_statement: identifier params
+  180                    | identifier
+
+  181 params: LPAREN actual_parameter_list RPAREN
+
+  182 actual_parameter_list: actual_parameter_list comma actual_parameter
+  183                      | actual_parameter
+
+  184 actual_parameter: expression
+  185                 | expression COLON expression
+  186                 | expression COLON expression COLON expression
+
+  187 goto_statement: GOTO label
+
+  188 case_statement: CASE case_index OF case_list_element_list END
+  189               | CASE case_index OF case_list_element_list SEMICOLON END
+  190               | CASE case_index OF case_list_element_list semicolon otherwisepart statement END
+  191               | CASE case_index OF case_list_element_list semicolon otherwisepart statement SEMICOLON END
+
+  192 case_index: expression
+
+  193 case_list_element_list: case_list_element_list semicolon case_list_element
+  194                       | case_list_element
+
+  195 case_list_element: case_constant_list COLON statement
+
+  196 otherwisepart: OTHERWISE
+  197              | OTHERWISE COLON
+
+  198 control_variable: identifier
+
+  199 initial_value: expression
+
+  200 direction: TO
+  201          | DOWNTO
+
+  202 final_value: expression
+
+  203 record_variable_list: record_variable_list comma variable_access
+  204                     | variable_access
+
+  205 boolean_expression: expression
+
+  206 expression: simple_expression
+  207           | simple_expression relop simple_expression
+
+  208 simple_expression: term
+  209                  | simple_expression addop term
+
+  210 term: factor
+  211     | term mulop factor
+
+  212 factor: sign factor
+  213       | exponentiation
+
+  214 exponentiation: primary
+  215               | primary STARSTAR exponentiation
+
+  216 primary: variable_access
+  217        | unsigned_constant
+  218        | function_designator
+  219        | set_constructor
+  220        | LPAREN expression RPAREN
+  221        | NOT primary
+
+  222 unsigned_constant: unsigned_number
+  223                  | CHARACTER_STRING
+  224                  | NIL
+
+  225 unsigned_number: unsigned_integer
+  226                | unsigned_real
+
+  227 unsigned_integer: DIGSEQ
+
+  228 unsigned_real: REALNUMBER
+
+  229 function_designator: identifier params
+
+  230 set_constructor: LBRAC member_designator_list RBRAC
+  231                | LBRAC RBRAC
+
+  232 member_designator_list: member_designator_list comma member_designator
+  233                       | member_designator
+
+  234 member_designator: member_designator DOTDOT expression
+  235                  | expression
+
+  236 addop: PLUS
+  237      | MINUS
+  238      | OR
+
+  239 mulop: STAR
+  240      | SLASH
+  241      | DIV
+  242      | MOD
+  243      | AND
+
+  244 relop: EQUAL
+  245      | NOTEQUAL
+  246      | LT
+  247      | GT
+  248      | LE
+  249      | GE
+  250      | IN
+
+  251 identifier: IDENTIFIER
+
+  252 semicolon: SEMICOLON
+
+  253 comma: COMMA
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+error (256)
+AND (258) 243
+ARRAY (259) 62
+ASSIGNMENT (260) 162 163 169
+CASE (261) 75 76 188 189 190 191
+CHARACTER_STRING (262) 36 223
+COLON (263) 74 78 82 83 84 100 120 121 129 130 140 142 185 186 195
+    197
+COMMA (264) 253
+CONST (265) 15
+DIGSEQ (266) 14 39 227
+DIV (267) 241
+DO (268) 160 161 162 163 164 165
+DOT (269) 3 178
+DOTDOT (270) 55 88 234
+DOWNTO (271) 201
+ELSE (272) 167 168
+END (273) 69 70 71 135 188 189 190 191
+EQUAL (274) 19 46 244
+EXTERNAL (275) 112
+FOR (276) 162 163
+FORWARD (277) 111
+FUNCTION (278) 129 130 132
+GE (279) 249
+GOTO (280) 187
+GT (281) 247
+IDENTIFIER (282) 251
+IF (283) 166 167 168
+IN (284) 250
+LABEL (285) 10
+LBRAC (286) 62 174 230 231
+LE (287) 248
+LPAREN (288) 5 31 54 82 83 84 113 181 220
+LT (289) 246
+MINUS (290) 38 237
+MOD (291) 242
+NIL (292) 224
+NOT (293) 33 221
+NOTEQUAL (294) 245
+OF (295) 62 75 76 91 93 188 189 190 191
+OR (296) 238
+OTHERWISE (297) 196 197
+PACKED (298) 57
+PBEGIN (299) 135
+PFILE (300) 93
+PLUS (301) 37 236
+PROCEDURE (302) 124
+PROGRAM (303) 4 5
+RBRAC (304) 62 174 230 231
+REALNUMBER (305) 41 228
+RECORD (306) 69 70 71
+REPEAT (307) 159
+RPAREN (308) 5 31 54 82 83 84 113 181 220
+SEMICOLON (309) 189 191 252
+SET (310) 91
+SLASH (311) 240
+STAR (312) 239
+STARSTAR (313) 29 215
+THEN (314) 166 167 168
+TO (315) 200
+TYPE (316) 42
+UNTIL (317) 159
+UPARROW (318) 94 173
+VAR (319) 96 121
+WHILE (320) 160 161
+WITH (321) 164 165
+
+
+Nonterminals, with rules where they appear
+
+$accept (67)
+    on left: 0
+file (68)
+    on left: 1 2, on right: 0
+program (69)
+    on left: 3, on right: 1
+program_heading (70)
+    on left: 4 5, on right: 3
+identifier_list (71)
+    on left: 6 7, on right: 5 6 54 74 100 120 121
+block (72)
+    on left: 8, on right: 3 125 133
+module (73)
+    on left: 9, on right: 2
+label_declaration_part (74)
+    on left: 10 11, on right: 8
+label_list (75)
+    on left: 12 13, on right: 10 12
+label (76)
+    on left: 14, on right: 12 13 140 142 187
+constant_definition_part (77)
+    on left: 15 16, on right: 8 9
+constant_list (78)
+    on left: 17 18, on right: 15 17
+constant_definition (79)
+    on left: 19, on right: 17 18
+cexpression (80)
+    on left: 20 21, on right: 19 31
+csimple_expression (81)
+    on left: 22 23, on right: 20 21 23
+cterm (82)
+    on left: 24 25, on right: 22 23 25
+cfactor (83)
+    on left: 26 27, on right: 24 25 26
+cexponentiation (84)
+    on left: 28 29, on right: 27 29
+cprimary (85)
+    on left: 30 31 32 33, on right: 28 29 33
+constant (86)
+    on left: 34 35 36, on right: 55 87 88
+sign (87)
+    on left: 37 38, on right: 26 35 212
+non_string (88)
+    on left: 39 40 41, on right: 34 35
+type_definition_part (89)
+    on left: 42 43, on right: 8 9
+type_definition_list (90)
+    on left: 44 45, on right: 42 44
+type_definition (91)
+    on left: 46, on right: 44 45
+type_denoter (92)
+    on left: 47 48, on right: 46 68 74 100
+new_type (93)
+    on left: 49 50 51, on right: 48
+new_ordinal_type (94)
+    on left: 52 53, on right: 49 66
+enumerated_type (95)
+    on left: 54, on right: 52
+subrange_type (96)
+    on left: 55, on right: 53
+new_structured_type (97)
+    on left: 56 57, on right: 50
+structured_type (98)
+    on left: 58 59 60 61, on right: 56 57
+array_type (99)
+    on left: 62, on right: 58
+index_list (100)
+    on left: 63 64, on right: 62 63
+index_type (101)
+    on left: 65, on right: 63 64
+ordinal_type (102)
+    on left: 66 67, on right: 65 92
+component_type (103)
+    on left: 68, on right: 62 93
+record_type (104)
+    on left: 69 70 71, on right: 59
+record_section_list (105)
+    on left: 72 73, on right: 69 70 72 82 83
+record_section (106)
+    on left: 74, on right: 72 73
+variant_part (107)
+    on left: 75 76 77, on right: 70 71 83 84
+variant_selector (108)
+    on left: 78 79, on right: 75 76
+variant_list (109)
+    on left: 80 81, on right: 75 76 80
+variant (110)
+    on left: 82 83 84, on right: 80 81
+case_constant_list (111)
+    on left: 85 86, on right: 82 83 84 85 195
+case_constant (112)
+    on left: 87 88, on right: 85 86
+tag_field (113)
+    on left: 89, on right: 78
+tag_type (114)
+    on left: 90, on right: 78 79
+set_type (115)
+    on left: 91, on right: 60
+base_type (116)
+    on left: 92, on right: 91
+file_type (117)
+    on left: 93, on right: 61
+new_pointer_type (118)
+    on left: 94, on right: 51
+domain_type (119)
+    on left: 95, on right: 94
+variable_declaration_part (120)
+    on left: 96 97, on right: 8 9
+variable_declaration_list (121)
+    on left: 98 99, on right: 96 98
+variable_declaration (122)
+    on left: 100, on right: 98 99
+procedure_and_function_declaration_part (123)
+    on left: 101 102, on right: 8 9
+proc_or_func_declaration_list (124)
+    on left: 103 104, on right: 101 103
+proc_or_func_declaration (125)
+    on left: 105 106, on right: 103 104
+procedure_declaration (126)
+    on left: 107 108, on right: 105
+procedure_heading (127)
+    on left: 109 110, on right: 107 108 122
+directive (128)
+    on left: 111 112, on right: 107 126
+formal_parameter_list (129)
+    on left: 113, on right: 110 130
+formal_parameter_section_list (130)
+    on left: 114 115, on right: 113 114
+formal_parameter_section (131)
+    on left: 116 117 118 119, on right: 114 115
+value_parameter_specification (132)
+    on left: 120, on right: 116
+variable_parameter_specification (133)
+    on left: 121, on right: 117
+procedural_parameter_specification (134)
+    on left: 122, on right: 118
+functional_parameter_specification (135)
+    on left: 123, on right: 119
+procedure_identification (136)
+    on left: 124, on right: 109 110
+procedure_block (137)
+    on left: 125, on right: 108
+function_declaration (138)
+    on left: 126 127 128, on right: 106
+function_heading (139)
+    on left: 129 130, on right: 123 126 128
+result_type (140)
+    on left: 131, on right: 129 130
+function_identification (141)
+    on left: 132, on right: 127
+function_block (142)
+    on left: 133, on right: 127 128
+statement_part (143)
+    on left: 134, on right: 8
+compound_statement (144)
+    on left: 135, on right: 134 147
+statement_sequence (145)
+    on left: 136 137, on right: 135 136 159
+statement (146)
+    on left: 138 139, on right: 136 137 166 190 191 195
+open_statement (147)
+    on left: 140 141, on right: 138 160 162 164 167
+closed_statement (148)
+    on left: 142 143, on right: 139 161 163 165 167 168
+non_labeled_closed_statement (149)
+    on left: 144 145 146 147 148 149 150 151 152 153 154, on right:
+    142 143
+non_labeled_open_statement (150)
+    on left: 155 156 157 158, on right: 140 141
+repeat_statement (151)
+    on left: 159, on right: 149
+open_while_statement (152)
+    on left: 160, on right: 157
+closed_while_statement (153)
+    on left: 161, on right: 152
+open_for_statement (154)
+    on left: 162, on right: 158
+closed_for_statement (155)
+    on left: 163, on right: 153
+open_with_statement (156)
+    on left: 164, on right: 155
+closed_with_statement (157)
+    on left: 165, on right: 150
+open_if_statement (158)
+    on left: 166 167, on right: 156
+closed_if_statement (159)
+    on left: 168, on right: 151
+assignment_statement (160)
+    on left: 169, on right: 144
+variable_access (161)
+    on left: 170 171 172 173, on right: 169 173 174 178 203 204 216
+indexed_variable (162)
+    on left: 174, on right: 171
+index_expression_list (163)
+    on left: 175 176, on right: 174 175
+index_expression (164)
+    on left: 177, on right: 175 176
+field_designator (165)
+    on left: 178, on right: 172
+procedure_statement (166)
+    on left: 179 180, on right: 145
+params (167)
+    on left: 181, on right: 179 229
+actual_parameter_list (168)
+    on left: 182 183, on right: 181 182
+actual_parameter (169)
+    on left: 184 185 186, on right: 182 183
+goto_statement (170)
+    on left: 187, on right: 146
+case_statement (171)
+    on left: 188 189 190 191, on right: 148
+case_index (172)
+    on left: 192, on right: 188 189 190 191
+case_list_element_list (173)
+    on left: 193 194, on right: 188 189 190 191 193
+case_list_element (174)
+    on left: 195, on right: 193 194
+otherwisepart (175)
+    on left: 196 197, on right: 190 191
+control_variable (176)
+    on left: 198, on right: 162 163
+initial_value (177)
+    on left: 199, on right: 162 163
+direction (178)
+    on left: 200 201, on right: 162 163
+final_value (179)
+    on left: 202, on right: 162 163
+record_variable_list (180)
+    on left: 203 204, on right: 164 165 203
+boolean_expression (181)
+    on left: 205, on right: 159 160 161 166 167 168
+expression (182)
+    on left: 206 207, on right: 169 177 184 185 186 192 199 202 205
+    220 234 235
+simple_expression (183)
+    on left: 208 209, on right: 206 207 209
+term (184)
+    on left: 210 211, on right: 208 209 211
+factor (185)
+    on left: 212 213, on right: 210 211 212
+exponentiation (186)
+    on left: 214 215, on right: 213 215
+primary (187)
+    on left: 216 217 218 219 220 221, on right: 214 215 221
+unsigned_constant (188)
+    on left: 222 223 224, on right: 32 217
+unsigned_number (189)
+    on left: 225 226, on right: 222
+unsigned_integer (190)
+    on left: 227, on right: 225
+unsigned_real (191)
+    on left: 228, on right: 226
+function_designator (192)
+    on left: 229, on right: 218
+set_constructor (193)
+    on left: 230 231, on right: 219
+member_designator_list (194)
+    on left: 232 233, on right: 230 232
+member_designator (195)
+    on left: 234 235, on right: 232 233 234
+addop (196)
+    on left: 236 237 238, on right: 23 209
+mulop (197)
+    on left: 239 240 241 242 243, on right: 25 211
+relop (198)
+    on left: 244 245 246 247 248 249 250, on right: 21 207
+identifier (199)
+    on left: 251, on right: 4 5 6 7 19 30 40 46 47 67 89 90 95 120
+    121 124 129 130 131 132 170 178 179 180 198 229
+semicolon (200)
+    on left: 252, on right: 3 10 19 46 70 72 75 80 83 96 98 101 103
+    107 108 114 126 127 128 136 190 191 193
+comma (201)
+    on left: 253, on right: 6 12 63 85 175 182 203 232
+
+
+state 0
+
+    0 $accept: . file $end
+
+    CONST    shift, and go to state 1
+    PROGRAM  shift, and go to state 2
+
+    $default  reduce using rule 16 (constant_definition_part)
+
+    file                      go to state 3
+    program                   go to state 4
+    program_heading           go to state 5
+    module                    go to state 6
+    constant_definition_part  go to state 7
+
+
+state 1
+
+   15 constant_definition_part: CONST . constant_list
+
+    IDENTIFIER  shift, and go to state 8
+
+    constant_list        go to state 9
+    constant_definition  go to state 10
+    identifier           go to state 11
+
+
+state 2
+
+    4 program_heading: PROGRAM . identifier
+    5                | PROGRAM . identifier LPAREN identifier_list RPAREN
+
+    IDENTIFIER  shift, and go to state 8
+
+    identifier  go to state 12
+
+
+state 3
+
+    0 $accept: file . $end
+
+    $end  shift, and go to state 13
+
+
+state 4
+
+    1 file: program .
+
+    $default  reduce using rule 1 (file)
+
+
+state 5
+
+    3 program: program_heading . semicolon block DOT
+
+    SEMICOLON  shift, and go to state 14
+
+    semicolon  go to state 15
+
+
+state 6
+
+    2 file: module .
+
+    $default  reduce using rule 2 (file)
+
+
+state 7
+
+    9 module: constant_definition_part . type_definition_part variable_declaration_part procedure_and_function_declaration_part
+
+    TYPE  shift, and go to state 16
+
+    $default  reduce using rule 43 (type_definition_part)
+
+    type_definition_part  go to state 17
+
+
+state 8
+
+  251 identifier: IDENTIFIER .
+
+    $default  reduce using rule 251 (identifier)
+
+
+state 9
+
+   15 constant_definition_part: CONST constant_list .
+   17 constant_list: constant_list . constant_definition
+
+    IDENTIFIER  shift, and go to state 8
+
+    $default  reduce using rule 15 (constant_definition_part)
+
+    constant_definition  go to state 18
+    identifier           go to state 11
+
+
+state 10
+
+   18 constant_list: constant_definition .
+
+    $default  reduce using rule 18 (constant_list)
+
+
+state 11
+
+   19 constant_definition: identifier . EQUAL cexpression semicolon
+
+    EQUAL  shift, and go to state 19
+
+
+state 12
+
+    4 program_heading: PROGRAM identifier .
+    5                | PROGRAM identifier . LPAREN identifier_list RPAREN
+
+    LPAREN  shift, and go to state 20
+
+    $default  reduce using rule 4 (program_heading)
+
+
+state 13
+
+    0 $accept: file $end .
+
+    $default  accept
+
+
+state 14
+
+  252 semicolon: SEMICOLON .
+
+    $default  reduce using rule 252 (semicolon)
+
+
+state 15
+
+    3 program: program_heading semicolon . block DOT
+
+    LABEL  shift, and go to state 21
+
+    $default  reduce using rule 11 (label_declaration_part)
+
+    block                   go to state 22
+    label_declaration_part  go to state 23
+
+
+state 16
+
+   42 type_definition_part: TYPE . type_definition_list
+
+    IDENTIFIER  shift, and go to state 8
+
+    type_definition_list  go to state 24
+    type_definition       go to state 25
+    identifier            go to state 26
+
+
+state 17
+
+    9 module: constant_definition_part type_definition_part . variable_declaration_part procedure_and_function_declaration_part
+
+    VAR  shift, and go to state 27
+
+    $default  reduce using rule 97 (variable_declaration_part)
+
+    variable_declaration_part  go to state 28
+
+
+state 18
+
+   17 constant_list: constant_list constant_definition .
+
+    $default  reduce using rule 17 (constant_list)
+
+
+state 19
+
+   19 constant_definition: identifier EQUAL . cexpression semicolon
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LPAREN            shift, and go to state 31
+    MINUS             shift, and go to state 32
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 34
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 36
+
+    cexpression         go to state 37
+    csimple_expression  go to state 38
+    cterm               go to state 39
+    cfactor             go to state 40
+    cexponentiation     go to state 41
+    cprimary            go to state 42
+    sign                go to state 43
+    unsigned_constant   go to state 44
+    unsigned_number     go to state 45
+    unsigned_integer    go to state 46
+    unsigned_real       go to state 47
+    identifier          go to state 48
+
+
+state 20
+
+    5 program_heading: PROGRAM identifier LPAREN . identifier_list RPAREN
+
+    IDENTIFIER  shift, and go to state 8
+
+    identifier_list  go to state 49
+    identifier       go to state 50
+
+
+state 21
+
+   10 label_declaration_part: LABEL . label_list semicolon
+
+    DIGSEQ  shift, and go to state 51
+
+    label_list  go to state 52
+    label       go to state 53
+
+
+state 22
+
+    3 program: program_heading semicolon block . DOT
+
+    DOT  shift, and go to state 54
+
+
+state 23
+
+    8 block: label_declaration_part . constant_definition_part type_definition_part variable_declaration_part procedure_and_function_declaration_part statement_part
+
+    CONST  shift, and go to state 1
+
+    $default  reduce using rule 16 (constant_definition_part)
+
+    constant_definition_part  go to state 55
+
+
+state 24
+
+   42 type_definition_part: TYPE type_definition_list .
+   44 type_definition_list: type_definition_list . type_definition
+
+    IDENTIFIER  shift, and go to state 8
+
+    $default  reduce using rule 42 (type_definition_part)
+
+    type_definition  go to state 56
+    identifier       go to state 26
+
+
+state 25
+
+   45 type_definition_list: type_definition .
+
+    $default  reduce using rule 45 (type_definition_list)
+
+
+state 26
+
+   46 type_definition: identifier . EQUAL type_denoter semicolon
+
+    EQUAL  shift, and go to state 57
+
+
+state 27
+
+   96 variable_declaration_part: VAR . variable_declaration_list semicolon
+
+    IDENTIFIER  shift, and go to state 8
+
+    identifier_list            go to state 58
+    variable_declaration_list  go to state 59
+    variable_declaration       go to state 60
+    identifier                 go to state 50
+
+
+state 28
+
+    9 module: constant_definition_part type_definition_part variable_declaration_part . procedure_and_function_declaration_part
+
+    FUNCTION   shift, and go to state 61
+    PROCEDURE  shift, and go to state 62
+
+    $default  reduce using rule 102 (procedure_and_function_declaration_part)
+
+    procedure_and_function_declaration_part  go to state 63
+    proc_or_func_declaration_list            go to state 64
+    proc_or_func_declaration                 go to state 65
+    procedure_declaration                    go to state 66
+    procedure_heading                        go to state 67
+    procedure_identification                 go to state 68
+    function_declaration                     go to state 69
+    function_heading                         go to state 70
+    function_identification                  go to state 71
+
+
+state 29
+
+  223 unsigned_constant: CHARACTER_STRING .
+
+    $default  reduce using rule 223 (unsigned_constant)
+
+
+state 30
+
+  227 unsigned_integer: DIGSEQ .
+
+    $default  reduce using rule 227 (unsigned_integer)
+
+
+state 31
+
+   31 cprimary: LPAREN . cexpression RPAREN
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LPAREN            shift, and go to state 31
+    MINUS             shift, and go to state 32
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 34
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 36
+
+    cexpression         go to state 72
+    csimple_expression  go to state 38
+    cterm               go to state 39
+    cfactor             go to state 40
+    cexponentiation     go to state 41
+    cprimary            go to state 42
+    sign                go to state 43
+    unsigned_constant   go to state 44
+    unsigned_number     go to state 45
+    unsigned_integer    go to state 46
+    unsigned_real       go to state 47
+    identifier          go to state 48
+
+
+state 32
+
+   38 sign: MINUS .
+
+    $default  reduce using rule 38 (sign)
+
+
+state 33
+
+  224 unsigned_constant: NIL .
+
+    $default  reduce using rule 224 (unsigned_constant)
+
+
+state 34
+
+   33 cprimary: NOT . cprimary
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LPAREN            shift, and go to state 31
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 34
+    REALNUMBER        shift, and go to state 36
+
+    cprimary           go to state 73
+    unsigned_constant  go to state 44
+    unsigned_number    go to state 45
+    unsigned_integer   go to state 46
+    unsigned_real      go to state 47
+    identifier         go to state 48
+
+
+state 35
+
+   37 sign: PLUS .
+
+    $default  reduce using rule 37 (sign)
+
+
+state 36
+
+  228 unsigned_real: REALNUMBER .
+
+    $default  reduce using rule 228 (unsigned_real)
+
+
+state 37
+
+   19 constant_definition: identifier EQUAL cexpression . semicolon
+
+    SEMICOLON  shift, and go to state 14
+
+    semicolon  go to state 74
+
+
+state 38
+
+   20 cexpression: csimple_expression .
+   21            | csimple_expression . relop csimple_expression
+   23 csimple_expression: csimple_expression . addop cterm
+
+    EQUAL     shift, and go to state 75
+    GE        shift, and go to state 76
+    GT        shift, and go to state 77
+    IN        shift, and go to state 78
+    LE        shift, and go to state 79
+    LT        shift, and go to state 80
+    MINUS     shift, and go to state 81
+    NOTEQUAL  shift, and go to state 82
+    OR        shift, and go to state 83
+    PLUS      shift, and go to state 84
+
+    $default  reduce using rule 20 (cexpression)
+
+    addop  go to state 85
+    relop  go to state 86
+
+
+state 39
+
+   22 csimple_expression: cterm .
+   25 cterm: cterm . mulop cfactor
+
+    AND    shift, and go to state 87
+    DIV    shift, and go to state 88
+    MOD    shift, and go to state 89
+    SLASH  shift, and go to state 90
+    STAR   shift, and go to state 91
+
+    $default  reduce using rule 22 (csimple_expression)
+
+    mulop  go to state 92
+
+
+state 40
+
+   24 cterm: cfactor .
+
+    $default  reduce using rule 24 (cterm)
+
+
+state 41
+
+   27 cfactor: cexponentiation .
+
+    $default  reduce using rule 27 (cfactor)
+
+
+state 42
+
+   28 cexponentiation: cprimary .
+   29                | cprimary . STARSTAR cexponentiation
+
+    STARSTAR  shift, and go to state 93
+
+    $default  reduce using rule 28 (cexponentiation)
+
+
+state 43
+
+   26 cfactor: sign . cfactor
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LPAREN            shift, and go to state 31
+    MINUS             shift, and go to state 32
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 34
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 36
+
+    cfactor            go to state 94
+    cexponentiation    go to state 41
+    cprimary           go to state 42
+    sign               go to state 43
+    unsigned_constant  go to state 44
+    unsigned_number    go to state 45
+    unsigned_integer   go to state 46
+    unsigned_real      go to state 47
+    identifier         go to state 48
+
+
+state 44
+
+   32 cprimary: unsigned_constant .
+
+    $default  reduce using rule 32 (cprimary)
+
+
+state 45
+
+  222 unsigned_constant: unsigned_number .
+
+    $default  reduce using rule 222 (unsigned_constant)
+
+
+state 46
+
+  225 unsigned_number: unsigned_integer .
+
+    $default  reduce using rule 225 (unsigned_number)
+
+
+state 47
+
+  226 unsigned_number: unsigned_real .
+
+    $default  reduce using rule 226 (unsigned_number)
+
+
+state 48
+
+   30 cprimary: identifier .
+
+    $default  reduce using rule 30 (cprimary)
+
+
+state 49
+
+    5 program_heading: PROGRAM identifier LPAREN identifier_list . RPAREN
+    6 identifier_list: identifier_list . comma identifier
+
+    COMMA   shift, and go to state 95
+    RPAREN  shift, and go to state 96
+
+    comma  go to state 97
+
+
+state 50
+
+    7 identifier_list: identifier .
+
+    $default  reduce using rule 7 (identifier_list)
+
+
+state 51
+
+   14 label: DIGSEQ .
+
+    $default  reduce using rule 14 (label)
+
+
+state 52
+
+   10 label_declaration_part: LABEL label_list . semicolon
+   12 label_list: label_list . comma label
+
+    COMMA      shift, and go to state 95
+    SEMICOLON  shift, and go to state 14
+
+    semicolon  go to state 98
+    comma      go to state 99
+
+
+state 53
+
+   13 label_list: label .
+
+    $default  reduce using rule 13 (label_list)
+
+
+state 54
+
+    3 program: program_heading semicolon block DOT .
+
+    $default  reduce using rule 3 (program)
+
+
+state 55
+
+    8 block: label_declaration_part constant_definition_part . type_definition_part variable_declaration_part procedure_and_function_declaration_part statement_part
+
+    TYPE  shift, and go to state 16
+
+    $default  reduce using rule 43 (type_definition_part)
+
+    type_definition_part  go to state 100
+
+
+state 56
+
+   44 type_definition_list: type_definition_list type_definition .
+
+    $default  reduce using rule 44 (type_definition_list)
+
+
+state 57
+
+   46 type_definition: identifier EQUAL . type_denoter semicolon
+
+    ARRAY             shift, and go to state 101
+    CHARACTER_STRING  shift, and go to state 102
+    DIGSEQ            shift, and go to state 103
+    IDENTIFIER        shift, and go to state 8
+    LPAREN            shift, and go to state 104
+    MINUS             shift, and go to state 32
+    PACKED            shift, and go to state 105
+    PFILE             shift, and go to state 106
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 107
+    RECORD            shift, and go to state 108
+    SET               shift, and go to state 109
+    UPARROW           shift, and go to state 110
+
+    constant             go to state 111
+    sign                 go to state 112
+    non_string           go to state 113
+    type_denoter         go to state 114
+    new_type             go to state 115
+    new_ordinal_type     go to state 116
+    enumerated_type      go to state 117
+    subrange_type        go to state 118
+    new_structured_type  go to state 119
+    structured_type      go to state 120
+    array_type           go to state 121
+    record_type          go to state 122
+    set_type             go to state 123
+    file_type            go to state 124
+    new_pointer_type     go to state 125
+    identifier           go to state 126
+
+
+state 58
+
+    6 identifier_list: identifier_list . comma identifier
+  100 variable_declaration: identifier_list . COLON type_denoter
+
+    COLON  shift, and go to state 127
+    COMMA  shift, and go to state 95
+
+    comma  go to state 97
+
+
+state 59
+
+   96 variable_declaration_part: VAR variable_declaration_list . semicolon
+   98 variable_declaration_list: variable_declaration_list . semicolon variable_declaration
+
+    SEMICOLON  shift, and go to state 14
+
+    semicolon  go to state 128
+
+
+state 60
+
+   99 variable_declaration_list: variable_declaration .
+
+    $default  reduce using rule 99 (variable_declaration_list)
+
+
+state 61
+
+  129 function_heading: FUNCTION . identifier COLON result_type
+  130                 | FUNCTION . identifier formal_parameter_list COLON result_type
+  132 function_identification: FUNCTION . identifier
+
+    IDENTIFIER  shift, and go to state 8
+
+    identifier  go to state 129
+
+
+state 62
+
+  124 procedure_identification: PROCEDURE . identifier
+
+    IDENTIFIER  shift, and go to state 8
+
+    identifier  go to state 130
+
+
+state 63
+
+    9 module: constant_definition_part type_definition_part variable_declaration_part procedure_and_function_declaration_part .
+
+    $default  reduce using rule 9 (module)
+
+
+state 64
+
+  101 procedure_and_function_declaration_part: proc_or_func_declaration_list . semicolon
+  103 proc_or_func_declaration_list: proc_or_func_declaration_list . semicolon proc_or_func_declaration
+
+    SEMICOLON  shift, and go to state 14
+
+    semicolon  go to state 131
+
+
+state 65
+
+  104 proc_or_func_declaration_list: proc_or_func_declaration .
+
+    $default  reduce using rule 104 (proc_or_func_declaration_list)
+
+
+state 66
+
+  105 proc_or_func_declaration: procedure_declaration .
+
+    $default  reduce using rule 105 (proc_or_func_declaration)
+
+
+state 67
+
+  107 procedure_declaration: procedure_heading . semicolon directive
+  108                      | procedure_heading . semicolon procedure_block
+
+    SEMICOLON  shift, and go to state 14
+
+    semicolon  go to state 132
+
+
+state 68
+
+  109 procedure_heading: procedure_identification .
+  110                  | procedure_identification . formal_parameter_list
+
+    LPAREN  shift, and go to state 133
+
+    $default  reduce using rule 109 (procedure_heading)
+
+    formal_parameter_list  go to state 134
+
+
+state 69
+
+  106 proc_or_func_declaration: function_declaration .
+
+    $default  reduce using rule 106 (proc_or_func_declaration)
+
+
+state 70
+
+  126 function_declaration: function_heading . semicolon directive
+  128                     | function_heading . semicolon function_block
+
+    SEMICOLON  shift, and go to state 14
+
+    semicolon  go to state 135
+
+
+state 71
+
+  127 function_declaration: function_identification . semicolon function_block
+
+    SEMICOLON  shift, and go to state 14
+
+    semicolon  go to state 136
+
+
+state 72
+
+   31 cprimary: LPAREN cexpression . RPAREN
+
+    RPAREN  shift, and go to state 137
+
+
+state 73
+
+   33 cprimary: NOT cprimary .
+
+    $default  reduce using rule 33 (cprimary)
+
+
+state 74
+
+   19 constant_definition: identifier EQUAL cexpression semicolon .
+
+    $default  reduce using rule 19 (constant_definition)
+
+
+state 75
+
+  244 relop: EQUAL .
+
+    $default  reduce using rule 244 (relop)
+
+
+state 76
+
+  249 relop: GE .
+
+    $default  reduce using rule 249 (relop)
+
+
+state 77
+
+  247 relop: GT .
+
+    $default  reduce using rule 247 (relop)
+
+
+state 78
+
+  250 relop: IN .
+
+    $default  reduce using rule 250 (relop)
+
+
+state 79
+
+  248 relop: LE .
+
+    $default  reduce using rule 248 (relop)
+
+
+state 80
+
+  246 relop: LT .
+
+    $default  reduce using rule 246 (relop)
+
+
+state 81
+
+  237 addop: MINUS .
+
+    $default  reduce using rule 237 (addop)
+
+
+state 82
+
+  245 relop: NOTEQUAL .
+
+    $default  reduce using rule 245 (relop)
+
+
+state 83
+
+  238 addop: OR .
+
+    $default  reduce using rule 238 (addop)
+
+
+state 84
+
+  236 addop: PLUS .
+
+    $default  reduce using rule 236 (addop)
+
+
+state 85
+
+   23 csimple_expression: csimple_expression addop . cterm
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LPAREN            shift, and go to state 31
+    MINUS             shift, and go to state 32
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 34
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 36
+
+    cterm              go to state 138
+    cfactor            go to state 40
+    cexponentiation    go to state 41
+    cprimary           go to state 42
+    sign               go to state 43
+    unsigned_constant  go to state 44
+    unsigned_number    go to state 45
+    unsigned_integer   go to state 46
+    unsigned_real      go to state 47
+    identifier         go to state 48
+
+
+state 86
+
+   21 cexpression: csimple_expression relop . csimple_expression
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LPAREN            shift, and go to state 31
+    MINUS             shift, and go to state 32
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 34
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 36
+
+    csimple_expression  go to state 139
+    cterm               go to state 39
+    cfactor             go to state 40
+    cexponentiation     go to state 41
+    cprimary            go to state 42
+    sign                go to state 43
+    unsigned_constant   go to state 44
+    unsigned_number     go to state 45
+    unsigned_integer    go to state 46
+    unsigned_real       go to state 47
+    identifier          go to state 48
+
+
+state 87
+
+  243 mulop: AND .
+
+    $default  reduce using rule 243 (mulop)
+
+
+state 88
+
+  241 mulop: DIV .
+
+    $default  reduce using rule 241 (mulop)
+
+
+state 89
+
+  242 mulop: MOD .
+
+    $default  reduce using rule 242 (mulop)
+
+
+state 90
+
+  240 mulop: SLASH .
+
+    $default  reduce using rule 240 (mulop)
+
+
+state 91
+
+  239 mulop: STAR .
+
+    $default  reduce using rule 239 (mulop)
+
+
+state 92
+
+   25 cterm: cterm mulop . cfactor
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LPAREN            shift, and go to state 31
+    MINUS             shift, and go to state 32
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 34
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 36
+
+    cfactor            go to state 140
+    cexponentiation    go to state 41
+    cprimary           go to state 42
+    sign               go to state 43
+    unsigned_constant  go to state 44
+    unsigned_number    go to state 45
+    unsigned_integer   go to state 46
+    unsigned_real      go to state 47
+    identifier         go to state 48
+
+
+state 93
+
+   29 cexponentiation: cprimary STARSTAR . cexponentiation
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LPAREN            shift, and go to state 31
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 34
+    REALNUMBER        shift, and go to state 36
+
+    cexponentiation    go to state 141
+    cprimary           go to state 42
+    unsigned_constant  go to state 44
+    unsigned_number    go to state 45
+    unsigned_integer   go to state 46
+    unsigned_real      go to state 47
+    identifier         go to state 48
+
+
+state 94
+
+   26 cfactor: sign cfactor .
+
+    $default  reduce using rule 26 (cfactor)
+
+
+state 95
+
+  253 comma: COMMA .
+
+    $default  reduce using rule 253 (comma)
+
+
+state 96
+
+    5 program_heading: PROGRAM identifier LPAREN identifier_list RPAREN .
+
+    $default  reduce using rule 5 (program_heading)
+
+
+state 97
+
+    6 identifier_list: identifier_list comma . identifier
+
+    IDENTIFIER  shift, and go to state 8
+
+    identifier  go to state 142
+
+
+state 98
+
+   10 label_declaration_part: LABEL label_list semicolon .
+
+    $default  reduce using rule 10 (label_declaration_part)
+
+
+state 99
+
+   12 label_list: label_list comma . label
+
+    DIGSEQ  shift, and go to state 51
+
+    label  go to state 143
+
+
+state 100
+
+    8 block: label_declaration_part constant_definition_part type_definition_part . variable_declaration_part procedure_and_function_declaration_part statement_part
+
+    VAR  shift, and go to state 27
+
+    $default  reduce using rule 97 (variable_declaration_part)
+
+    variable_declaration_part  go to state 144
+
+
+state 101
+
+   62 array_type: ARRAY . LBRAC index_list RBRAC OF component_type
+
+    LBRAC  shift, and go to state 145
+
+
+state 102
+
+   36 constant: CHARACTER_STRING .
+
+    $default  reduce using rule 36 (constant)
+
+
+state 103
+
+   39 non_string: DIGSEQ .
+
+    $default  reduce using rule 39 (non_string)
+
+
+state 104
+
+   54 enumerated_type: LPAREN . identifier_list RPAREN
+
+    IDENTIFIER  shift, and go to state 8
+
+    identifier_list  go to state 146
+    identifier       go to state 50
+
+
+state 105
+
+   57 new_structured_type: PACKED . structured_type
+
+    ARRAY   shift, and go to state 101
+    PFILE   shift, and go to state 106
+    RECORD  shift, and go to state 108
+    SET     shift, and go to state 109
+
+    structured_type  go to state 147
+    array_type       go to state 121
+    record_type      go to state 122
+    set_type         go to state 123
+    file_type        go to state 124
+
+
+state 106
+
+   93 file_type: PFILE . OF component_type
+
+    OF  shift, and go to state 148
+
+
+state 107
+
+   41 non_string: REALNUMBER .
+
+    $default  reduce using rule 41 (non_string)
+
+
+state 108
+
+   69 record_type: RECORD . record_section_list END
+   70            | RECORD . record_section_list semicolon variant_part END
+   71            | RECORD . variant_part END
+
+    CASE        shift, and go to state 149
+    IDENTIFIER  shift, and go to state 8
+
+    $default  reduce using rule 77 (variant_part)
+
+    identifier_list      go to state 150
+    record_section_list  go to state 151
+    record_section       go to state 152
+    variant_part         go to state 153
+    identifier           go to state 50
+
+
+state 109
+
+   91 set_type: SET . OF base_type
+
+    OF  shift, and go to state 154
+
+
+state 110
+
+   94 new_pointer_type: UPARROW . domain_type
+
+    IDENTIFIER  shift, and go to state 8
+
+    domain_type  go to state 155
+    identifier   go to state 156
+
+
+state 111
+
+   55 subrange_type: constant . DOTDOT constant
+
+    DOTDOT  shift, and go to state 157
+
+
+state 112
+
+   35 constant: sign . non_string
+
+    DIGSEQ      shift, and go to state 103
+    IDENTIFIER  shift, and go to state 8
+    REALNUMBER  shift, and go to state 107
+
+    non_string  go to state 158
+    identifier  go to state 159
+
+
+state 113
+
+   34 constant: non_string .
+
+    $default  reduce using rule 34 (constant)
+
+
+state 114
+
+   46 type_definition: identifier EQUAL type_denoter . semicolon
+
+    SEMICOLON  shift, and go to state 14
+
+    semicolon  go to state 160
+
+
+state 115
+
+   48 type_denoter: new_type .
+
+    $default  reduce using rule 48 (type_denoter)
+
+
+state 116
+
+   49 new_type: new_ordinal_type .
+
+    $default  reduce using rule 49 (new_type)
+
+
+state 117
+
+   52 new_ordinal_type: enumerated_type .
+
+    $default  reduce using rule 52 (new_ordinal_type)
+
+
+state 118
+
+   53 new_ordinal_type: subrange_type .
+
+    $default  reduce using rule 53 (new_ordinal_type)
+
+
+state 119
+
+   50 new_type: new_structured_type .
+
+    $default  reduce using rule 50 (new_type)
+
+
+state 120
+
+   56 new_structured_type: structured_type .
+
+    $default  reduce using rule 56 (new_structured_type)
+
+
+state 121
+
+   58 structured_type: array_type .
+
+    $default  reduce using rule 58 (structured_type)
+
+
+state 122
+
+   59 structured_type: record_type .
+
+    $default  reduce using rule 59 (structured_type)
+
+
+state 123
+
+   60 structured_type: set_type .
+
+    $default  reduce using rule 60 (structured_type)
+
+
+state 124
+
+   61 structured_type: file_type .
+
+    $default  reduce using rule 61 (structured_type)
+
+
+state 125
+
+   51 new_type: new_pointer_type .
+
+    $default  reduce using rule 51 (new_type)
+
+
+state 126
+
+   40 non_string: identifier .
+   47 type_denoter: identifier .
+
+    DOTDOT    reduce using rule 40 (non_string)
+    $default  reduce using rule 47 (type_denoter)
+
+
+state 127
+
+  100 variable_declaration: identifier_list COLON . type_denoter
+
+    ARRAY             shift, and go to state 101
+    CHARACTER_STRING  shift, and go to state 102
+    DIGSEQ            shift, and go to state 103
+    IDENTIFIER        shift, and go to state 8
+    LPAREN            shift, and go to state 104
+    MINUS             shift, and go to state 32
+    PACKED            shift, and go to state 105
+    PFILE             shift, and go to state 106
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 107
+    RECORD            shift, and go to state 108
+    SET               shift, and go to state 109
+    UPARROW           shift, and go to state 110
+
+    constant             go to state 111
+    sign                 go to state 112
+    non_string           go to state 113
+    type_denoter         go to state 161
+    new_type             go to state 115
+    new_ordinal_type     go to state 116
+    enumerated_type      go to state 117
+    subrange_type        go to state 118
+    new_structured_type  go to state 119
+    structured_type      go to state 120
+    array_type           go to state 121
+    record_type          go to state 122
+    set_type             go to state 123
+    file_type            go to state 124
+    new_pointer_type     go to state 125
+    identifier           go to state 126
+
+
+state 128
+
+   96 variable_declaration_part: VAR variable_declaration_list semicolon .
+   98 variable_declaration_list: variable_declaration_list semicolon . variable_declaration
+
+    IDENTIFIER  shift, and go to state 8
+
+    $default  reduce using rule 96 (variable_declaration_part)
+
+    identifier_list       go to state 58
+    variable_declaration  go to state 162
+    identifier            go to state 50
+
+
+state 129
+
+  129 function_heading: FUNCTION identifier . COLON result_type
+  130                 | FUNCTION identifier . formal_parameter_list COLON result_type
+  132 function_identification: FUNCTION identifier .
+
+    COLON   shift, and go to state 163
+    LPAREN  shift, and go to state 133
+
+    $default  reduce using rule 132 (function_identification)
+
+    formal_parameter_list  go to state 164
+
+
+state 130
+
+  124 procedure_identification: PROCEDURE identifier .
+
+    $default  reduce using rule 124 (procedure_identification)
+
+
+state 131
+
+  101 procedure_and_function_declaration_part: proc_or_func_declaration_list semicolon .
+  103 proc_or_func_declaration_list: proc_or_func_declaration_list semicolon . proc_or_func_declaration
+
+    FUNCTION   shift, and go to state 61
+    PROCEDURE  shift, and go to state 62
+
+    $default  reduce using rule 101 (procedure_and_function_declaration_part)
+
+    proc_or_func_declaration  go to state 165
+    procedure_declaration     go to state 66
+    procedure_heading         go to state 67
+    procedure_identification  go to state 68
+    function_declaration      go to state 69
+    function_heading          go to state 70
+    function_identification   go to state 71
+
+
+state 132
+
+  107 procedure_declaration: procedure_heading semicolon . directive
+  108                      | procedure_heading semicolon . procedure_block
+
+    EXTERNAL  shift, and go to state 166
+    FORWARD   shift, and go to state 167
+    LABEL     shift, and go to state 21
+
+    $default  reduce using rule 11 (label_declaration_part)
+
+    block                   go to state 168
+    label_declaration_part  go to state 23
+    directive               go to state 169
+    procedure_block         go to state 170
+
+
+state 133
+
+  113 formal_parameter_list: LPAREN . formal_parameter_section_list RPAREN
+
+    FUNCTION    shift, and go to state 171
+    IDENTIFIER  shift, and go to state 8
+    PROCEDURE   shift, and go to state 62
+    VAR         shift, and go to state 172
+
+    identifier_list                     go to state 173
+    procedure_heading                   go to state 174
+    formal_parameter_section_list       go to state 175
+    formal_parameter_section            go to state 176
+    value_parameter_specification       go to state 177
+    variable_parameter_specification    go to state 178
+    procedural_parameter_specification  go to state 179
+    functional_parameter_specification  go to state 180
+    procedure_identification            go to state 68
+    function_heading                    go to state 181
+    identifier                          go to state 50
+
+
+state 134
+
+  110 procedure_heading: procedure_identification formal_parameter_list .
+
+    $default  reduce using rule 110 (procedure_heading)
+
+
+state 135
+
+  126 function_declaration: function_heading semicolon . directive
+  128                     | function_heading semicolon . function_block
+
+    EXTERNAL  shift, and go to state 166
+    FORWARD   shift, and go to state 167
+    LABEL     shift, and go to state 21
+
+    $default  reduce using rule 11 (label_declaration_part)
+
+    block                   go to state 182
+    label_declaration_part  go to state 23
+    directive               go to state 183
+    function_block          go to state 184
+
+
+state 136
+
+  127 function_declaration: function_identification semicolon . function_block
+
+    LABEL  shift, and go to state 21
+
+    $default  reduce using rule 11 (label_declaration_part)
+
+    block                   go to state 182
+    label_declaration_part  go to state 23
+    function_block          go to state 185
+
+
+state 137
+
+   31 cprimary: LPAREN cexpression RPAREN .
+
+    $default  reduce using rule 31 (cprimary)
+
+
+state 138
+
+   23 csimple_expression: csimple_expression addop cterm .
+   25 cterm: cterm . mulop cfactor
+
+    AND    shift, and go to state 87
+    DIV    shift, and go to state 88
+    MOD    shift, and go to state 89
+    SLASH  shift, and go to state 90
+    STAR   shift, and go to state 91
+
+    $default  reduce using rule 23 (csimple_expression)
+
+    mulop  go to state 92
+
+
+state 139
+
+   21 cexpression: csimple_expression relop csimple_expression .
+   23 csimple_expression: csimple_expression . addop cterm
+
+    MINUS  shift, and go to state 81
+    OR     shift, and go to state 83
+    PLUS   shift, and go to state 84
+
+    $default  reduce using rule 21 (cexpression)
+
+    addop  go to state 85
+
+
+state 140
+
+   25 cterm: cterm mulop cfactor .
+
+    $default  reduce using rule 25 (cterm)
+
+
+state 141
+
+   29 cexponentiation: cprimary STARSTAR cexponentiation .
+
+    $default  reduce using rule 29 (cexponentiation)
+
+
+state 142
+
+    6 identifier_list: identifier_list comma identifier .
+
+    $default  reduce using rule 6 (identifier_list)
+
+
+state 143
+
+   12 label_list: label_list comma label .
+
+    $default  reduce using rule 12 (label_list)
+
+
+state 144
+
+    8 block: label_declaration_part constant_definition_part type_definition_part variable_declaration_part . procedure_and_function_declaration_part statement_part
+
+    FUNCTION   shift, and go to state 61
+    PROCEDURE  shift, and go to state 62
+
+    $default  reduce using rule 102 (procedure_and_function_declaration_part)
+
+    procedure_and_function_declaration_part  go to state 186
+    proc_or_func_declaration_list            go to state 64
+    proc_or_func_declaration                 go to state 65
+    procedure_declaration                    go to state 66
+    procedure_heading                        go to state 67
+    procedure_identification                 go to state 68
+    function_declaration                     go to state 69
+    function_heading                         go to state 70
+    function_identification                  go to state 71
+
+
+state 145
+
+   62 array_type: ARRAY LBRAC . index_list RBRAC OF component_type
+
+    CHARACTER_STRING  shift, and go to state 102
+    DIGSEQ            shift, and go to state 103
+    IDENTIFIER        shift, and go to state 8
+    LPAREN            shift, and go to state 104
+    MINUS             shift, and go to state 32
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 107
+
+    constant          go to state 111
+    sign              go to state 112
+    non_string        go to state 113
+    new_ordinal_type  go to state 187
+    enumerated_type   go to state 117
+    subrange_type     go to state 118
+    index_list        go to state 188
+    index_type        go to state 189
+    ordinal_type      go to state 190
+    identifier        go to state 191
+
+
+state 146
+
+    6 identifier_list: identifier_list . comma identifier
+   54 enumerated_type: LPAREN identifier_list . RPAREN
+
+    COMMA   shift, and go to state 95
+    RPAREN  shift, and go to state 192
+
+    comma  go to state 97
+
+
+state 147
+
+   57 new_structured_type: PACKED structured_type .
+
+    $default  reduce using rule 57 (new_structured_type)
+
+
+state 148
+
+   93 file_type: PFILE OF . component_type
+
+    ARRAY             shift, and go to state 101
+    CHARACTER_STRING  shift, and go to state 102
+    DIGSEQ            shift, and go to state 103
+    IDENTIFIER        shift, and go to state 8
+    LPAREN            shift, and go to state 104
+    MINUS             shift, and go to state 32
+    PACKED            shift, and go to state 105
+    PFILE             shift, and go to state 106
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 107
+    RECORD            shift, and go to state 108
+    SET               shift, and go to state 109
+    UPARROW           shift, and go to state 110
+
+    constant             go to state 111
+    sign                 go to state 112
+    non_string           go to state 113
+    type_denoter         go to state 193
+    new_type             go to state 115
+    new_ordinal_type     go to state 116
+    enumerated_type      go to state 117
+    subrange_type        go to state 118
+    new_structured_type  go to state 119
+    structured_type      go to state 120
+    array_type           go to state 121
+    component_type       go to state 194
+    record_type          go to state 122
+    set_type             go to state 123
+    file_type            go to state 124
+    new_pointer_type     go to state 125
+    identifier           go to state 126
+
+
+state 149
+
+   75 variant_part: CASE . variant_selector OF variant_list semicolon
+   76             | CASE . variant_selector OF variant_list
+
+    IDENTIFIER  shift, and go to state 8
+
+    variant_selector  go to state 195
+    tag_field         go to state 196
+    tag_type          go to state 197
+    identifier        go to state 198
+
+
+state 150
+
+    6 identifier_list: identifier_list . comma identifier
+   74 record_section: identifier_list . COLON type_denoter
+
+    COLON  shift, and go to state 199
+    COMMA  shift, and go to state 95
+
+    comma  go to state 97
+
+
+state 151
+
+   69 record_type: RECORD record_section_list . END
+   70            | RECORD record_section_list . semicolon variant_part END
+   72 record_section_list: record_section_list . semicolon record_section
+
+    END        shift, and go to state 200
+    SEMICOLON  shift, and go to state 14
+
+    semicolon  go to state 201
+
+
+state 152
+
+   73 record_section_list: record_section .
+
+    $default  reduce using rule 73 (record_section_list)
+
+
+state 153
+
+   71 record_type: RECORD variant_part . END
+
+    END  shift, and go to state 202
+
+
+state 154
+
+   91 set_type: SET OF . base_type
+
+    CHARACTER_STRING  shift, and go to state 102
+    DIGSEQ            shift, and go to state 103
+    IDENTIFIER        shift, and go to state 8
+    LPAREN            shift, and go to state 104
+    MINUS             shift, and go to state 32
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 107
+
+    constant          go to state 111
+    sign              go to state 112
+    non_string        go to state 113
+    new_ordinal_type  go to state 187
+    enumerated_type   go to state 117
+    subrange_type     go to state 118
+    ordinal_type      go to state 203
+    base_type         go to state 204
+    identifier        go to state 191
+
+
+state 155
+
+   94 new_pointer_type: UPARROW domain_type .
+
+    $default  reduce using rule 94 (new_pointer_type)
+
+
+state 156
+
+   95 domain_type: identifier .
+
+    $default  reduce using rule 95 (domain_type)
+
+
+state 157
+
+   55 subrange_type: constant DOTDOT . constant
+
+    CHARACTER_STRING  shift, and go to state 102
+    DIGSEQ            shift, and go to state 103
+    IDENTIFIER        shift, and go to state 8
+    MINUS             shift, and go to state 32
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 107
+
+    constant    go to state 205
+    sign        go to state 112
+    non_string  go to state 113
+    identifier  go to state 159
+
+
+state 158
+
+   35 constant: sign non_string .
+
+    $default  reduce using rule 35 (constant)
+
+
+state 159
+
+   40 non_string: identifier .
+
+    $default  reduce using rule 40 (non_string)
+
+
+state 160
+
+   46 type_definition: identifier EQUAL type_denoter semicolon .
+
+    $default  reduce using rule 46 (type_definition)
+
+
+state 161
+
+  100 variable_declaration: identifier_list COLON type_denoter .
+
+    $default  reduce using rule 100 (variable_declaration)
+
+
+state 162
+
+   98 variable_declaration_list: variable_declaration_list semicolon variable_declaration .
+
+    $default  reduce using rule 98 (variable_declaration_list)
+
+
+state 163
+
+  129 function_heading: FUNCTION identifier COLON . result_type
+
+    IDENTIFIER  shift, and go to state 8
+
+    result_type  go to state 206
+    identifier   go to state 207
+
+
+state 164
+
+  130 function_heading: FUNCTION identifier formal_parameter_list . COLON result_type
+
+    COLON  shift, and go to state 208
+
+
+state 165
+
+  103 proc_or_func_declaration_list: proc_or_func_declaration_list semicolon proc_or_func_declaration .
+
+    $default  reduce using rule 103 (proc_or_func_declaration_list)
+
+
+state 166
+
+  112 directive: EXTERNAL .
+
+    $default  reduce using rule 112 (directive)
+
+
+state 167
+
+  111 directive: FORWARD .
+
+    $default  reduce using rule 111 (directive)
+
+
+state 168
+
+  125 procedure_block: block .
+
+    $default  reduce using rule 125 (procedure_block)
+
+
+state 169
+
+  107 procedure_declaration: procedure_heading semicolon directive .
+
+    $default  reduce using rule 107 (procedure_declaration)
+
+
+state 170
+
+  108 procedure_declaration: procedure_heading semicolon procedure_block .
+
+    $default  reduce using rule 108 (procedure_declaration)
+
+
+state 171
+
+  129 function_heading: FUNCTION . identifier COLON result_type
+  130                 | FUNCTION . identifier formal_parameter_list COLON result_type
+
+    IDENTIFIER  shift, and go to state 8
+
+    identifier  go to state 209
+
+
+state 172
+
+  121 variable_parameter_specification: VAR . identifier_list COLON identifier
+
+    IDENTIFIER  shift, and go to state 8
+
+    identifier_list  go to state 210
+    identifier       go to state 50
+
+
+state 173
+
+    6 identifier_list: identifier_list . comma identifier
+  120 value_parameter_specification: identifier_list . COLON identifier
+
+    COLON  shift, and go to state 211
+    COMMA  shift, and go to state 95
+
+    comma  go to state 97
+
+
+state 174
+
+  122 procedural_parameter_specification: procedure_heading .
+
+    $default  reduce using rule 122 (procedural_parameter_specification)
+
+
+state 175
+
+  113 formal_parameter_list: LPAREN formal_parameter_section_list . RPAREN
+  114 formal_parameter_section_list: formal_parameter_section_list . semicolon formal_parameter_section
+
+    RPAREN     shift, and go to state 212
+    SEMICOLON  shift, and go to state 14
+
+    semicolon  go to state 213
+
+
+state 176
+
+  115 formal_parameter_section_list: formal_parameter_section .
+
+    $default  reduce using rule 115 (formal_parameter_section_list)
+
+
+state 177
+
+  116 formal_parameter_section: value_parameter_specification .
+
+    $default  reduce using rule 116 (formal_parameter_section)
+
+
+state 178
+
+  117 formal_parameter_section: variable_parameter_specification .
+
+    $default  reduce using rule 117 (formal_parameter_section)
+
+
+state 179
+
+  118 formal_parameter_section: procedural_parameter_specification .
+
+    $default  reduce using rule 118 (formal_parameter_section)
+
+
+state 180
+
+  119 formal_parameter_section: functional_parameter_specification .
+
+    $default  reduce using rule 119 (formal_parameter_section)
+
+
+state 181
+
+  123 functional_parameter_specification: function_heading .
+
+    $default  reduce using rule 123 (functional_parameter_specification)
+
+
+state 182
+
+  133 function_block: block .
+
+    $default  reduce using rule 133 (function_block)
+
+
+state 183
+
+  126 function_declaration: function_heading semicolon directive .
+
+    $default  reduce using rule 126 (function_declaration)
+
+
+state 184
+
+  128 function_declaration: function_heading semicolon function_block .
+
+    $default  reduce using rule 128 (function_declaration)
+
+
+state 185
+
+  127 function_declaration: function_identification semicolon function_block .
+
+    $default  reduce using rule 127 (function_declaration)
+
+
+state 186
+
+    8 block: label_declaration_part constant_definition_part type_definition_part variable_declaration_part procedure_and_function_declaration_part . statement_part
+
+    PBEGIN  shift, and go to state 214
+
+    statement_part      go to state 215
+    compound_statement  go to state 216
+
+
+state 187
+
+   66 ordinal_type: new_ordinal_type .
+
+    $default  reduce using rule 66 (ordinal_type)
+
+
+state 188
+
+   62 array_type: ARRAY LBRAC index_list . RBRAC OF component_type
+   63 index_list: index_list . comma index_type
+
+    COMMA  shift, and go to state 95
+    RBRAC  shift, and go to state 217
+
+    comma  go to state 218
+
+
+state 189
+
+   64 index_list: index_type .
+
+    $default  reduce using rule 64 (index_list)
+
+
+state 190
+
+   65 index_type: ordinal_type .
+
+    $default  reduce using rule 65 (index_type)
+
+
+state 191
+
+   40 non_string: identifier .
+   67 ordinal_type: identifier .
+
+    DOTDOT    reduce using rule 40 (non_string)
+    $default  reduce using rule 67 (ordinal_type)
+
+
+state 192
+
+   54 enumerated_type: LPAREN identifier_list RPAREN .
+
+    $default  reduce using rule 54 (enumerated_type)
+
+
+state 193
+
+   68 component_type: type_denoter .
+
+    $default  reduce using rule 68 (component_type)
+
+
+state 194
+
+   93 file_type: PFILE OF component_type .
+
+    $default  reduce using rule 93 (file_type)
+
+
+state 195
+
+   75 variant_part: CASE variant_selector . OF variant_list semicolon
+   76             | CASE variant_selector . OF variant_list
+
+    OF  shift, and go to state 219
+
+
+state 196
+
+   78 variant_selector: tag_field . COLON tag_type
+
+    COLON  shift, and go to state 220
+
+
+state 197
+
+   79 variant_selector: tag_type .
+
+    $default  reduce using rule 79 (variant_selector)
+
+
+state 198
+
+   89 tag_field: identifier .
+   90 tag_type: identifier .
+
+    OF        reduce using rule 90 (tag_type)
+    $default  reduce using rule 89 (tag_field)
+
+
+state 199
+
+   74 record_section: identifier_list COLON . type_denoter
+
+    ARRAY             shift, and go to state 101
+    CHARACTER_STRING  shift, and go to state 102
+    DIGSEQ            shift, and go to state 103
+    IDENTIFIER        shift, and go to state 8
+    LPAREN            shift, and go to state 104
+    MINUS             shift, and go to state 32
+    PACKED            shift, and go to state 105
+    PFILE             shift, and go to state 106
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 107
+    RECORD            shift, and go to state 108
+    SET               shift, and go to state 109
+    UPARROW           shift, and go to state 110
+
+    constant             go to state 111
+    sign                 go to state 112
+    non_string           go to state 113
+    type_denoter         go to state 221
+    new_type             go to state 115
+    new_ordinal_type     go to state 116
+    enumerated_type      go to state 117
+    subrange_type        go to state 118
+    new_structured_type  go to state 119
+    structured_type      go to state 120
+    array_type           go to state 121
+    record_type          go to state 122
+    set_type             go to state 123
+    file_type            go to state 124
+    new_pointer_type     go to state 125
+    identifier           go to state 126
+
+
+state 200
+
+   69 record_type: RECORD record_section_list END .
+
+    $default  reduce using rule 69 (record_type)
+
+
+state 201
+
+   70 record_type: RECORD record_section_list semicolon . variant_part END
+   72 record_section_list: record_section_list semicolon . record_section
+
+    CASE        shift, and go to state 149
+    IDENTIFIER  shift, and go to state 8
+
+    $default  reduce using rule 77 (variant_part)
+
+    identifier_list  go to state 150
+    record_section   go to state 222
+    variant_part     go to state 223
+    identifier       go to state 50
+
+
+state 202
+
+   71 record_type: RECORD variant_part END .
+
+    $default  reduce using rule 71 (record_type)
+
+
+state 203
+
+   92 base_type: ordinal_type .
+
+    $default  reduce using rule 92 (base_type)
+
+
+state 204
+
+   91 set_type: SET OF base_type .
+
+    $default  reduce using rule 91 (set_type)
+
+
+state 205
+
+   55 subrange_type: constant DOTDOT constant .
+
+    $default  reduce using rule 55 (subrange_type)
+
+
+state 206
+
+  129 function_heading: FUNCTION identifier COLON result_type .
+
+    $default  reduce using rule 129 (function_heading)
+
+
+state 207
+
+  131 result_type: identifier .
+
+    $default  reduce using rule 131 (result_type)
+
+
+state 208
+
+  130 function_heading: FUNCTION identifier formal_parameter_list COLON . result_type
+
+    IDENTIFIER  shift, and go to state 8
+
+    result_type  go to state 224
+    identifier   go to state 207
+
+
+state 209
+
+  129 function_heading: FUNCTION identifier . COLON result_type
+  130                 | FUNCTION identifier . formal_parameter_list COLON result_type
+
+    COLON   shift, and go to state 163
+    LPAREN  shift, and go to state 133
+
+    formal_parameter_list  go to state 164
+
+
+state 210
+
+    6 identifier_list: identifier_list . comma identifier
+  121 variable_parameter_specification: VAR identifier_list . COLON identifier
+
+    COLON  shift, and go to state 225
+    COMMA  shift, and go to state 95
+
+    comma  go to state 97
+
+
+state 211
+
+  120 value_parameter_specification: identifier_list COLON . identifier
+
+    IDENTIFIER  shift, and go to state 8
+
+    identifier  go to state 226
+
+
+state 212
+
+  113 formal_parameter_list: LPAREN formal_parameter_section_list RPAREN .
+
+    $default  reduce using rule 113 (formal_parameter_list)
+
+
+state 213
+
+  114 formal_parameter_section_list: formal_parameter_section_list semicolon . formal_parameter_section
+
+    FUNCTION    shift, and go to state 171
+    IDENTIFIER  shift, and go to state 8
+    PROCEDURE   shift, and go to state 62
+    VAR         shift, and go to state 172
+
+    identifier_list                     go to state 173
+    procedure_heading                   go to state 174
+    formal_parameter_section            go to state 227
+    value_parameter_specification       go to state 177
+    variable_parameter_specification    go to state 178
+    procedural_parameter_specification  go to state 179
+    functional_parameter_specification  go to state 180
+    procedure_identification            go to state 68
+    function_heading                    go to state 181
+    identifier                          go to state 50
+
+
+state 214
+
+  135 compound_statement: PBEGIN . statement_sequence END
+
+    CASE        shift, and go to state 228
+    DIGSEQ      shift, and go to state 51
+    FOR         shift, and go to state 229
+    GOTO        shift, and go to state 230
+    IDENTIFIER  shift, and go to state 8
+    IF          shift, and go to state 231
+    PBEGIN      shift, and go to state 214
+    REPEAT      shift, and go to state 232
+    WHILE       shift, and go to state 233
+    WITH        shift, and go to state 234
+
+    $default  reduce using rule 154 (non_labeled_closed_statement)
+
+    label                         go to state 235
+    compound_statement            go to state 236
+    statement_sequence            go to state 237
+    statement                     go to state 238
+    open_statement                go to state 239
+    closed_statement              go to state 240
+    non_labeled_closed_statement  go to state 241
+    non_labeled_open_statement    go to state 242
+    repeat_statement              go to state 243
+    open_while_statement          go to state 244
+    closed_while_statement        go to state 245
+    open_for_statement            go to state 246
+    closed_for_statement          go to state 247
+    open_with_statement           go to state 248
+    closed_with_statement         go to state 249
+    open_if_statement             go to state 250
+    closed_if_statement           go to state 251
+    assignment_statement          go to state 252
+    variable_access               go to state 253
+    indexed_variable              go to state 254
+    field_designator              go to state 255
+    procedure_statement           go to state 256
+    goto_statement                go to state 257
+    case_statement                go to state 258
+    identifier                    go to state 259
+
+
+state 215
+
+    8 block: label_declaration_part constant_definition_part type_definition_part variable_declaration_part procedure_and_function_declaration_part statement_part .
+
+    $default  reduce using rule 8 (block)
+
+
+state 216
+
+  134 statement_part: compound_statement .
+
+    $default  reduce using rule 134 (statement_part)
+
+
+state 217
+
+   62 array_type: ARRAY LBRAC index_list RBRAC . OF component_type
+
+    OF  shift, and go to state 260
+
+
+state 218
+
+   63 index_list: index_list comma . index_type
+
+    CHARACTER_STRING  shift, and go to state 102
+    DIGSEQ            shift, and go to state 103
+    IDENTIFIER        shift, and go to state 8
+    LPAREN            shift, and go to state 104
+    MINUS             shift, and go to state 32
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 107
+
+    constant          go to state 111
+    sign              go to state 112
+    non_string        go to state 113
+    new_ordinal_type  go to state 187
+    enumerated_type   go to state 117
+    subrange_type     go to state 118
+    index_type        go to state 261
+    ordinal_type      go to state 190
+    identifier        go to state 191
+
+
+state 219
+
+   75 variant_part: CASE variant_selector OF . variant_list semicolon
+   76             | CASE variant_selector OF . variant_list
+
+    CHARACTER_STRING  shift, and go to state 102
+    DIGSEQ            shift, and go to state 103
+    IDENTIFIER        shift, and go to state 8
+    MINUS             shift, and go to state 32
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 107
+
+    constant            go to state 262
+    sign                go to state 112
+    non_string          go to state 113
+    variant_list        go to state 263
+    variant             go to state 264
+    case_constant_list  go to state 265
+    case_constant       go to state 266
+    identifier          go to state 159
+
+
+state 220
+
+   78 variant_selector: tag_field COLON . tag_type
+
+    IDENTIFIER  shift, and go to state 8
+
+    tag_type    go to state 267
+    identifier  go to state 268
+
+
+state 221
+
+   74 record_section: identifier_list COLON type_denoter .
+
+    $default  reduce using rule 74 (record_section)
+
+
+state 222
+
+   72 record_section_list: record_section_list semicolon record_section .
+
+    $default  reduce using rule 72 (record_section_list)
+
+
+state 223
+
+   70 record_type: RECORD record_section_list semicolon variant_part . END
+
+    END  shift, and go to state 269
+
+
+state 224
+
+  130 function_heading: FUNCTION identifier formal_parameter_list COLON result_type .
+
+    $default  reduce using rule 130 (function_heading)
+
+
+state 225
+
+  121 variable_parameter_specification: VAR identifier_list COLON . identifier
+
+    IDENTIFIER  shift, and go to state 8
+
+    identifier  go to state 270
+
+
+state 226
+
+  120 value_parameter_specification: identifier_list COLON identifier .
+
+    $default  reduce using rule 120 (value_parameter_specification)
+
+
+state 227
+
+  114 formal_parameter_section_list: formal_parameter_section_list semicolon formal_parameter_section .
+
+    $default  reduce using rule 114 (formal_parameter_section_list)
+
+
+state 228
+
+  188 case_statement: CASE . case_index OF case_list_element_list END
+  189               | CASE . case_index OF case_list_element_list SEMICOLON END
+  190               | CASE . case_index OF case_list_element_list semicolon otherwisepart statement END
+  191               | CASE . case_index OF case_list_element_list semicolon otherwisepart statement SEMICOLON END
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LBRAC             shift, and go to state 271
+    LPAREN            shift, and go to state 272
+    MINUS             shift, and go to state 32
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 273
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 36
+
+    sign                 go to state 274
+    variable_access      go to state 275
+    indexed_variable     go to state 254
+    field_designator     go to state 255
+    case_index           go to state 276
+    expression           go to state 277
+    simple_expression    go to state 278
+    term                 go to state 279
+    factor               go to state 280
+    exponentiation       go to state 281
+    primary              go to state 282
+    unsigned_constant    go to state 283
+    unsigned_number      go to state 45
+    unsigned_integer     go to state 46
+    unsigned_real        go to state 47
+    function_designator  go to state 284
+    set_constructor      go to state 285
+    identifier           go to state 286
+
+
+state 229
+
+  162 open_for_statement: FOR . control_variable ASSIGNMENT initial_value direction final_value DO open_statement
+  163 closed_for_statement: FOR . control_variable ASSIGNMENT initial_value direction final_value DO closed_statement
+
+    IDENTIFIER  shift, and go to state 8
+
+    control_variable  go to state 287
+    identifier        go to state 288
+
+
+state 230
+
+  187 goto_statement: GOTO . label
+
+    DIGSEQ  shift, and go to state 51
+
+    label  go to state 289
+
+
+state 231
+
+  166 open_if_statement: IF . boolean_expression THEN statement
+  167                  | IF . boolean_expression THEN closed_statement ELSE open_statement
+  168 closed_if_statement: IF . boolean_expression THEN closed_statement ELSE closed_statement
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LBRAC             shift, and go to state 271
+    LPAREN            shift, and go to state 272
+    MINUS             shift, and go to state 32
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 273
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 36
+
+    sign                 go to state 274
+    variable_access      go to state 275
+    indexed_variable     go to state 254
+    field_designator     go to state 255
+    boolean_expression   go to state 290
+    expression           go to state 291
+    simple_expression    go to state 278
+    term                 go to state 279
+    factor               go to state 280
+    exponentiation       go to state 281
+    primary              go to state 282
+    unsigned_constant    go to state 283
+    unsigned_number      go to state 45
+    unsigned_integer     go to state 46
+    unsigned_real        go to state 47
+    function_designator  go to state 284
+    set_constructor      go to state 285
+    identifier           go to state 286
+
+
+state 232
+
+  159 repeat_statement: REPEAT . statement_sequence UNTIL boolean_expression
+
+    CASE        shift, and go to state 228
+    DIGSEQ      shift, and go to state 51
+    FOR         shift, and go to state 229
+    GOTO        shift, and go to state 230
+    IDENTIFIER  shift, and go to state 8
+    IF          shift, and go to state 231
+    PBEGIN      shift, and go to state 214
+    REPEAT      shift, and go to state 232
+    WHILE       shift, and go to state 233
+    WITH        shift, and go to state 234
+
+    $default  reduce using rule 154 (non_labeled_closed_statement)
+
+    label                         go to state 235
+    compound_statement            go to state 236
+    statement_sequence            go to state 292
+    statement                     go to state 238
+    open_statement                go to state 239
+    closed_statement              go to state 240
+    non_labeled_closed_statement  go to state 241
+    non_labeled_open_statement    go to state 242
+    repeat_statement              go to state 243
+    open_while_statement          go to state 244
+    closed_while_statement        go to state 245
+    open_for_statement            go to state 246
+    closed_for_statement          go to state 247
+    open_with_statement           go to state 248
+    closed_with_statement         go to state 249
+    open_if_statement             go to state 250
+    closed_if_statement           go to state 251
+    assignment_statement          go to state 252
+    variable_access               go to state 253
+    indexed_variable              go to state 254
+    field_designator              go to state 255
+    procedure_statement           go to state 256
+    goto_statement                go to state 257
+    case_statement                go to state 258
+    identifier                    go to state 259
+
+
+state 233
+
+  160 open_while_statement: WHILE . boolean_expression DO open_statement
+  161 closed_while_statement: WHILE . boolean_expression DO closed_statement
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LBRAC             shift, and go to state 271
+    LPAREN            shift, and go to state 272
+    MINUS             shift, and go to state 32
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 273
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 36
+
+    sign                 go to state 274
+    variable_access      go to state 275
+    indexed_variable     go to state 254
+    field_designator     go to state 255
+    boolean_expression   go to state 293
+    expression           go to state 291
+    simple_expression    go to state 278
+    term                 go to state 279
+    factor               go to state 280
+    exponentiation       go to state 281
+    primary              go to state 282
+    unsigned_constant    go to state 283
+    unsigned_number      go to state 45
+    unsigned_integer     go to state 46
+    unsigned_real        go to state 47
+    function_designator  go to state 284
+    set_constructor      go to state 285
+    identifier           go to state 286
+
+
+state 234
+
+  164 open_with_statement: WITH . record_variable_list DO open_statement
+  165 closed_with_statement: WITH . record_variable_list DO closed_statement
+
+    IDENTIFIER  shift, and go to state 8
+
+    variable_access       go to state 294
+    indexed_variable      go to state 254
+    field_designator      go to state 255
+    record_variable_list  go to state 295
+    identifier            go to state 296
+
+
+state 235
+
+  140 open_statement: label . COLON non_labeled_open_statement
+  142 closed_statement: label . COLON non_labeled_closed_statement
+
+    COLON  shift, and go to state 297
+
+
+state 236
+
+  147 non_labeled_closed_statement: compound_statement .
+
+    $default  reduce using rule 147 (non_labeled_closed_statement)
+
+
+state 237
+
+  135 compound_statement: PBEGIN statement_sequence . END
+  136 statement_sequence: statement_sequence . semicolon statement
+
+    END        shift, and go to state 298
+    SEMICOLON  shift, and go to state 14
+
+    semicolon  go to state 299
+
+
+state 238
+
+  137 statement_sequence: statement .
+
+    $default  reduce using rule 137 (statement_sequence)
+
+
+state 239
+
+  138 statement: open_statement .
+
+    $default  reduce using rule 138 (statement)
+
+
+state 240
+
+  139 statement: closed_statement .
+
+    $default  reduce using rule 139 (statement)
+
+
+state 241
+
+  143 closed_statement: non_labeled_closed_statement .
+
+    $default  reduce using rule 143 (closed_statement)
+
+
+state 242
+
+  141 open_statement: non_labeled_open_statement .
+
+    $default  reduce using rule 141 (open_statement)
+
+
+state 243
+
+  149 non_labeled_closed_statement: repeat_statement .
+
+    $default  reduce using rule 149 (non_labeled_closed_statement)
+
+
+state 244
+
+  157 non_labeled_open_statement: open_while_statement .
+
+    $default  reduce using rule 157 (non_labeled_open_statement)
+
+
+state 245
+
+  152 non_labeled_closed_statement: closed_while_statement .
+
+    $default  reduce using rule 152 (non_labeled_closed_statement)
+
+
+state 246
+
+  158 non_labeled_open_statement: open_for_statement .
+
+    $default  reduce using rule 158 (non_labeled_open_statement)
+
+
+state 247
+
+  153 non_labeled_closed_statement: closed_for_statement .
+
+    $default  reduce using rule 153 (non_labeled_closed_statement)
+
+
+state 248
+
+  155 non_labeled_open_statement: open_with_statement .
+
+    $default  reduce using rule 155 (non_labeled_open_statement)
+
+
+state 249
+
+  150 non_labeled_closed_statement: closed_with_statement .
+
+    $default  reduce using rule 150 (non_labeled_closed_statement)
+
+
+state 250
+
+  156 non_labeled_open_statement: open_if_statement .
+
+    $default  reduce using rule 156 (non_labeled_open_statement)
+
+
+state 251
+
+  151 non_labeled_closed_statement: closed_if_statement .
+
+    $default  reduce using rule 151 (non_labeled_closed_statement)
+
+
+state 252
+
+  144 non_labeled_closed_statement: assignment_statement .
+
+    $default  reduce using rule 144 (non_labeled_closed_statement)
+
+
+state 253
+
+  169 assignment_statement: variable_access . ASSIGNMENT expression
+  173 variable_access: variable_access . UPARROW
+  174 indexed_variable: variable_access . LBRAC index_expression_list RBRAC
+  178 field_designator: variable_access . DOT identifier
+
+    ASSIGNMENT  shift, and go to state 300
+    DOT         shift, and go to state 301
+    LBRAC       shift, and go to state 302
+    UPARROW     shift, and go to state 303
+
+
+state 254
+
+  171 variable_access: indexed_variable .
+
+    $default  reduce using rule 171 (variable_access)
+
+
+state 255
+
+  172 variable_access: field_designator .
+
+    $default  reduce using rule 172 (variable_access)
+
+
+state 256
+
+  145 non_labeled_closed_statement: procedure_statement .
+
+    $default  reduce using rule 145 (non_labeled_closed_statement)
+
+
+state 257
+
+  146 non_labeled_closed_statement: goto_statement .
+
+    $default  reduce using rule 146 (non_labeled_closed_statement)
+
+
+state 258
+
+  148 non_labeled_closed_statement: case_statement .
+
+    $default  reduce using rule 148 (non_labeled_closed_statement)
+
+
+state 259
+
+  170 variable_access: identifier .
+  179 procedure_statement: identifier . params
+  180                    | identifier .
+
+    LPAREN  shift, and go to state 304
+
+    ELSE       reduce using rule 180 (procedure_statement)
+    END        reduce using rule 180 (procedure_statement)
+    SEMICOLON  reduce using rule 180 (procedure_statement)
+    UNTIL      reduce using rule 180 (procedure_statement)
+    $default   reduce using rule 170 (variable_access)
+
+    params  go to state 305
+
+
+state 260
+
+   62 array_type: ARRAY LBRAC index_list RBRAC OF . component_type
+
+    ARRAY             shift, and go to state 101
+    CHARACTER_STRING  shift, and go to state 102
+    DIGSEQ            shift, and go to state 103
+    IDENTIFIER        shift, and go to state 8
+    LPAREN            shift, and go to state 104
+    MINUS             shift, and go to state 32
+    PACKED            shift, and go to state 105
+    PFILE             shift, and go to state 106
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 107
+    RECORD            shift, and go to state 108
+    SET               shift, and go to state 109
+    UPARROW           shift, and go to state 110
+
+    constant             go to state 111
+    sign                 go to state 112
+    non_string           go to state 113
+    type_denoter         go to state 193
+    new_type             go to state 115
+    new_ordinal_type     go to state 116
+    enumerated_type      go to state 117
+    subrange_type        go to state 118
+    new_structured_type  go to state 119
+    structured_type      go to state 120
+    array_type           go to state 121
+    component_type       go to state 306
+    record_type          go to state 122
+    set_type             go to state 123
+    file_type            go to state 124
+    new_pointer_type     go to state 125
+    identifier           go to state 126
+
+
+state 261
+
+   63 index_list: index_list comma index_type .
+
+    $default  reduce using rule 63 (index_list)
+
+
+state 262
+
+   87 case_constant: constant .
+   88              | constant . DOTDOT constant
+
+    DOTDOT  shift, and go to state 307
+
+    $default  reduce using rule 87 (case_constant)
+
+
+state 263
+
+   75 variant_part: CASE variant_selector OF variant_list . semicolon
+   76             | CASE variant_selector OF variant_list .
+   80 variant_list: variant_list . semicolon variant
+
+    SEMICOLON  shift, and go to state 14
+
+    $default  reduce using rule 76 (variant_part)
+
+    semicolon  go to state 308
+
+
+state 264
+
+   81 variant_list: variant .
+
+    $default  reduce using rule 81 (variant_list)
+
+
+state 265
+
+   82 variant: case_constant_list . COLON LPAREN record_section_list RPAREN
+   83        | case_constant_list . COLON LPAREN record_section_list semicolon variant_part RPAREN
+   84        | case_constant_list . COLON LPAREN variant_part RPAREN
+   85 case_constant_list: case_constant_list . comma case_constant
+
+    COLON  shift, and go to state 309
+    COMMA  shift, and go to state 95
+
+    comma  go to state 310
+
+
+state 266
+
+   86 case_constant_list: case_constant .
+
+    $default  reduce using rule 86 (case_constant_list)
+
+
+state 267
+
+   78 variant_selector: tag_field COLON tag_type .
+
+    $default  reduce using rule 78 (variant_selector)
+
+
+state 268
+
+   90 tag_type: identifier .
+
+    $default  reduce using rule 90 (tag_type)
+
+
+state 269
+
+   70 record_type: RECORD record_section_list semicolon variant_part END .
+
+    $default  reduce using rule 70 (record_type)
+
+
+state 270
+
+  121 variable_parameter_specification: VAR identifier_list COLON identifier .
+
+    $default  reduce using rule 121 (variable_parameter_specification)
+
+
+state 271
+
+  230 set_constructor: LBRAC . member_designator_list RBRAC
+  231                | LBRAC . RBRAC
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LBRAC             shift, and go to state 271
+    LPAREN            shift, and go to state 272
+    MINUS             shift, and go to state 32
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 273
+    PLUS              shift, and go to state 35
+    RBRAC             shift, and go to state 311
+    REALNUMBER        shift, and go to state 36
+
+    sign                    go to state 274
+    variable_access         go to state 275
+    indexed_variable        go to state 254
+    field_designator        go to state 255
+    expression              go to state 312
+    simple_expression       go to state 278
+    term                    go to state 279
+    factor                  go to state 280
+    exponentiation          go to state 281
+    primary                 go to state 282
+    unsigned_constant       go to state 283
+    unsigned_number         go to state 45
+    unsigned_integer        go to state 46
+    unsigned_real           go to state 47
+    function_designator     go to state 284
+    set_constructor         go to state 285
+    member_designator_list  go to state 313
+    member_designator       go to state 314
+    identifier              go to state 286
+
+
+state 272
+
+  220 primary: LPAREN . expression RPAREN
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LBRAC             shift, and go to state 271
+    LPAREN            shift, and go to state 272
+    MINUS             shift, and go to state 32
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 273
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 36
+
+    sign                 go to state 274
+    variable_access      go to state 275
+    indexed_variable     go to state 254
+    field_designator     go to state 255
+    expression           go to state 315
+    simple_expression    go to state 278
+    term                 go to state 279
+    factor               go to state 280
+    exponentiation       go to state 281
+    primary              go to state 282
+    unsigned_constant    go to state 283
+    unsigned_number      go to state 45
+    unsigned_integer     go to state 46
+    unsigned_real        go to state 47
+    function_designator  go to state 284
+    set_constructor      go to state 285
+    identifier           go to state 286
+
+
+state 273
+
+  221 primary: NOT . primary
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LBRAC             shift, and go to state 271
+    LPAREN            shift, and go to state 272
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 273
+    REALNUMBER        shift, and go to state 36
+
+    variable_access      go to state 275
+    indexed_variable     go to state 254
+    field_designator     go to state 255
+    primary              go to state 316
+    unsigned_constant    go to state 283
+    unsigned_number      go to state 45
+    unsigned_integer     go to state 46
+    unsigned_real        go to state 47
+    function_designator  go to state 284
+    set_constructor      go to state 285
+    identifier           go to state 286
+
+
+state 274
+
+  212 factor: sign . factor
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LBRAC             shift, and go to state 271
+    LPAREN            shift, and go to state 272
+    MINUS             shift, and go to state 32
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 273
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 36
+
+    sign                 go to state 274
+    variable_access      go to state 275
+    indexed_variable     go to state 254
+    field_designator     go to state 255
+    factor               go to state 317
+    exponentiation       go to state 281
+    primary              go to state 282
+    unsigned_constant    go to state 283
+    unsigned_number      go to state 45
+    unsigned_integer     go to state 46
+    unsigned_real        go to state 47
+    function_designator  go to state 284
+    set_constructor      go to state 285
+    identifier           go to state 286
+
+
+state 275
+
+  173 variable_access: variable_access . UPARROW
+  174 indexed_variable: variable_access . LBRAC index_expression_list RBRAC
+  178 field_designator: variable_access . DOT identifier
+  216 primary: variable_access .
+
+    DOT      shift, and go to state 301
+    LBRAC    shift, and go to state 302
+    UPARROW  shift, and go to state 303
+
+    $default  reduce using rule 216 (primary)
+
+
+state 276
+
+  188 case_statement: CASE case_index . OF case_list_element_list END
+  189               | CASE case_index . OF case_list_element_list SEMICOLON END
+  190               | CASE case_index . OF case_list_element_list semicolon otherwisepart statement END
+  191               | CASE case_index . OF case_list_element_list semicolon otherwisepart statement SEMICOLON END
+
+    OF  shift, and go to state 318
+
+
+state 277
+
+  192 case_index: expression .
+
+    $default  reduce using rule 192 (case_index)
+
+
+state 278
+
+  206 expression: simple_expression .
+  207           | simple_expression . relop simple_expression
+  209 simple_expression: simple_expression . addop term
+
+    EQUAL     shift, and go to state 75
+    GE        shift, and go to state 76
+    GT        shift, and go to state 77
+    IN        shift, and go to state 78
+    LE        shift, and go to state 79
+    LT        shift, and go to state 80
+    MINUS     shift, and go to state 81
+    NOTEQUAL  shift, and go to state 82
+    OR        shift, and go to state 83
+    PLUS      shift, and go to state 84
+
+    $default  reduce using rule 206 (expression)
+
+    addop  go to state 319
+    relop  go to state 320
+
+
+state 279
+
+  208 simple_expression: term .
+  211 term: term . mulop factor
+
+    AND    shift, and go to state 87
+    DIV    shift, and go to state 88
+    MOD    shift, and go to state 89
+    SLASH  shift, and go to state 90
+    STAR   shift, and go to state 91
+
+    $default  reduce using rule 208 (simple_expression)
+
+    mulop  go to state 321
+
+
+state 280
+
+  210 term: factor .
+
+    $default  reduce using rule 210 (term)
+
+
+state 281
+
+  213 factor: exponentiation .
+
+    $default  reduce using rule 213 (factor)
+
+
+state 282
+
+  214 exponentiation: primary .
+  215               | primary . STARSTAR exponentiation
+
+    STARSTAR  shift, and go to state 322
+
+    $default  reduce using rule 214 (exponentiation)
+
+
+state 283
+
+  217 primary: unsigned_constant .
+
+    $default  reduce using rule 217 (primary)
+
+
+state 284
+
+  218 primary: function_designator .
+
+    $default  reduce using rule 218 (primary)
+
+
+state 285
+
+  219 primary: set_constructor .
+
+    $default  reduce using rule 219 (primary)
+
+
+state 286
+
+  170 variable_access: identifier .
+  229 function_designator: identifier . params
+
+    LPAREN  shift, and go to state 304
+
+    $default  reduce using rule 170 (variable_access)
+
+    params  go to state 323
+
+
+state 287
+
+  162 open_for_statement: FOR control_variable . ASSIGNMENT initial_value direction final_value DO open_statement
+  163 closed_for_statement: FOR control_variable . ASSIGNMENT initial_value direction final_value DO closed_statement
+
+    ASSIGNMENT  shift, and go to state 324
+
+
+state 288
+
+  198 control_variable: identifier .
+
+    $default  reduce using rule 198 (control_variable)
+
+
+state 289
+
+  187 goto_statement: GOTO label .
+
+    $default  reduce using rule 187 (goto_statement)
+
+
+state 290
+
+  166 open_if_statement: IF boolean_expression . THEN statement
+  167                  | IF boolean_expression . THEN closed_statement ELSE open_statement
+  168 closed_if_statement: IF boolean_expression . THEN closed_statement ELSE closed_statement
+
+    THEN  shift, and go to state 325
+
+
+state 291
+
+  205 boolean_expression: expression .
+
+    $default  reduce using rule 205 (boolean_expression)
+
+
+state 292
+
+  136 statement_sequence: statement_sequence . semicolon statement
+  159 repeat_statement: REPEAT statement_sequence . UNTIL boolean_expression
+
+    SEMICOLON  shift, and go to state 14
+    UNTIL      shift, and go to state 326
+
+    semicolon  go to state 299
+
+
+state 293
+
+  160 open_while_statement: WHILE boolean_expression . DO open_statement
+  161 closed_while_statement: WHILE boolean_expression . DO closed_statement
+
+    DO  shift, and go to state 327
+
+
+state 294
+
+  173 variable_access: variable_access . UPARROW
+  174 indexed_variable: variable_access . LBRAC index_expression_list RBRAC
+  178 field_designator: variable_access . DOT identifier
+  204 record_variable_list: variable_access .
+
+    DOT      shift, and go to state 301
+    LBRAC    shift, and go to state 302
+    UPARROW  shift, and go to state 303
+
+    $default  reduce using rule 204 (record_variable_list)
+
+
+state 295
+
+  164 open_with_statement: WITH record_variable_list . DO open_statement
+  165 closed_with_statement: WITH record_variable_list . DO closed_statement
+  203 record_variable_list: record_variable_list . comma variable_access
+
+    COMMA  shift, and go to state 95
+    DO     shift, and go to state 328
+
+    comma  go to state 329
+
+
+state 296
+
+  170 variable_access: identifier .
+
+    $default  reduce using rule 170 (variable_access)
+
+
+state 297
+
+  140 open_statement: label COLON . non_labeled_open_statement
+  142 closed_statement: label COLON . non_labeled_closed_statement
+
+    CASE        shift, and go to state 228
+    FOR         shift, and go to state 229
+    GOTO        shift, and go to state 230
+    IDENTIFIER  shift, and go to state 8
+    IF          shift, and go to state 231
+    PBEGIN      shift, and go to state 214
+    REPEAT      shift, and go to state 232
+    WHILE       shift, and go to state 233
+    WITH        shift, and go to state 234
+
+    $default  reduce using rule 154 (non_labeled_closed_statement)
+
+    compound_statement            go to state 236
+    non_labeled_closed_statement  go to state 330
+    non_labeled_open_statement    go to state 331
+    repeat_statement              go to state 243
+    open_while_statement          go to state 244
+    closed_while_statement        go to state 245
+    open_for_statement            go to state 246
+    closed_for_statement          go to state 247
+    open_with_statement           go to state 248
+    closed_with_statement         go to state 249
+    open_if_statement             go to state 250
+    closed_if_statement           go to state 251
+    assignment_statement          go to state 252
+    variable_access               go to state 253
+    indexed_variable              go to state 254
+    field_designator              go to state 255
+    procedure_statement           go to state 256
+    goto_statement                go to state 257
+    case_statement                go to state 258
+    identifier                    go to state 259
+
+
+state 298
+
+  135 compound_statement: PBEGIN statement_sequence END .
+
+    $default  reduce using rule 135 (compound_statement)
+
+
+state 299
+
+  136 statement_sequence: statement_sequence semicolon . statement
+
+    CASE        shift, and go to state 228
+    DIGSEQ      shift, and go to state 51
+    FOR         shift, and go to state 229
+    GOTO        shift, and go to state 230
+    IDENTIFIER  shift, and go to state 8
+    IF          shift, and go to state 231
+    PBEGIN      shift, and go to state 214
+    REPEAT      shift, and go to state 232
+    WHILE       shift, and go to state 233
+    WITH        shift, and go to state 234
+
+    $default  reduce using rule 154 (non_labeled_closed_statement)
+
+    label                         go to state 235
+    compound_statement            go to state 236
+    statement                     go to state 332
+    open_statement                go to state 239
+    closed_statement              go to state 240
+    non_labeled_closed_statement  go to state 241
+    non_labeled_open_statement    go to state 242
+    repeat_statement              go to state 243
+    open_while_statement          go to state 244
+    closed_while_statement        go to state 245
+    open_for_statement            go to state 246
+    closed_for_statement          go to state 247
+    open_with_statement           go to state 248
+    closed_with_statement         go to state 249
+    open_if_statement             go to state 250
+    closed_if_statement           go to state 251
+    assignment_statement          go to state 252
+    variable_access               go to state 253
+    indexed_variable              go to state 254
+    field_designator              go to state 255
+    procedure_statement           go to state 256
+    goto_statement                go to state 257
+    case_statement                go to state 258
+    identifier                    go to state 259
+
+
+state 300
+
+  169 assignment_statement: variable_access ASSIGNMENT . expression
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LBRAC             shift, and go to state 271
+    LPAREN            shift, and go to state 272
+    MINUS             shift, and go to state 32
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 273
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 36
+
+    sign                 go to state 274
+    variable_access      go to state 275
+    indexed_variable     go to state 254
+    field_designator     go to state 255
+    expression           go to state 333
+    simple_expression    go to state 278
+    term                 go to state 279
+    factor               go to state 280
+    exponentiation       go to state 281
+    primary              go to state 282
+    unsigned_constant    go to state 283
+    unsigned_number      go to state 45
+    unsigned_integer     go to state 46
+    unsigned_real        go to state 47
+    function_designator  go to state 284
+    set_constructor      go to state 285
+    identifier           go to state 286
+
+
+state 301
+
+  178 field_designator: variable_access DOT . identifier
+
+    IDENTIFIER  shift, and go to state 8
+
+    identifier  go to state 334
+
+
+state 302
+
+  174 indexed_variable: variable_access LBRAC . index_expression_list RBRAC
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LBRAC             shift, and go to state 271
+    LPAREN            shift, and go to state 272
+    MINUS             shift, and go to state 32
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 273
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 36
+
+    sign                   go to state 274
+    variable_access        go to state 275
+    indexed_variable       go to state 254
+    index_expression_list  go to state 335
+    index_expression       go to state 336
+    field_designator       go to state 255
+    expression             go to state 337
+    simple_expression      go to state 278
+    term                   go to state 279
+    factor                 go to state 280
+    exponentiation         go to state 281
+    primary                go to state 282
+    unsigned_constant      go to state 283
+    unsigned_number        go to state 45
+    unsigned_integer       go to state 46
+    unsigned_real          go to state 47
+    function_designator    go to state 284
+    set_constructor        go to state 285
+    identifier             go to state 286
+
+
+state 303
+
+  173 variable_access: variable_access UPARROW .
+
+    $default  reduce using rule 173 (variable_access)
+
+
+state 304
+
+  181 params: LPAREN . actual_parameter_list RPAREN
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LBRAC             shift, and go to state 271
+    LPAREN            shift, and go to state 272
+    MINUS             shift, and go to state 32
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 273
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 36
+
+    sign                   go to state 274
+    variable_access        go to state 275
+    indexed_variable       go to state 254
+    field_designator       go to state 255
+    actual_parameter_list  go to state 338
+    actual_parameter       go to state 339
+    expression             go to state 340
+    simple_expression      go to state 278
+    term                   go to state 279
+    factor                 go to state 280
+    exponentiation         go to state 281
+    primary                go to state 282
+    unsigned_constant      go to state 283
+    unsigned_number        go to state 45
+    unsigned_integer       go to state 46
+    unsigned_real          go to state 47
+    function_designator    go to state 284
+    set_constructor        go to state 285
+    identifier             go to state 286
+
+
+state 305
+
+  179 procedure_statement: identifier params .
+
+    $default  reduce using rule 179 (procedure_statement)
+
+
+state 306
+
+   62 array_type: ARRAY LBRAC index_list RBRAC OF component_type .
+
+    $default  reduce using rule 62 (array_type)
+
+
+state 307
+
+   88 case_constant: constant DOTDOT . constant
+
+    CHARACTER_STRING  shift, and go to state 102
+    DIGSEQ            shift, and go to state 103
+    IDENTIFIER        shift, and go to state 8
+    MINUS             shift, and go to state 32
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 107
+
+    constant    go to state 341
+    sign        go to state 112
+    non_string  go to state 113
+    identifier  go to state 159
+
+
+state 308
+
+   75 variant_part: CASE variant_selector OF variant_list semicolon .
+   80 variant_list: variant_list semicolon . variant
+
+    CHARACTER_STRING  shift, and go to state 102
+    DIGSEQ            shift, and go to state 103
+    IDENTIFIER        shift, and go to state 8
+    MINUS             shift, and go to state 32
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 107
+
+    $default  reduce using rule 75 (variant_part)
+
+    constant            go to state 262
+    sign                go to state 112
+    non_string          go to state 113
+    variant             go to state 342
+    case_constant_list  go to state 265
+    case_constant       go to state 266
+    identifier          go to state 159
+
+
+state 309
+
+   82 variant: case_constant_list COLON . LPAREN record_section_list RPAREN
+   83        | case_constant_list COLON . LPAREN record_section_list semicolon variant_part RPAREN
+   84        | case_constant_list COLON . LPAREN variant_part RPAREN
+
+    LPAREN  shift, and go to state 343
+
+
+state 310
+
+   85 case_constant_list: case_constant_list comma . case_constant
+
+    CHARACTER_STRING  shift, and go to state 102
+    DIGSEQ            shift, and go to state 103
+    IDENTIFIER        shift, and go to state 8
+    MINUS             shift, and go to state 32
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 107
+
+    constant       go to state 262
+    sign           go to state 112
+    non_string     go to state 113
+    case_constant  go to state 344
+    identifier     go to state 159
+
+
+state 311
+
+  231 set_constructor: LBRAC RBRAC .
+
+    $default  reduce using rule 231 (set_constructor)
+
+
+state 312
+
+  235 member_designator: expression .
+
+    $default  reduce using rule 235 (member_designator)
+
+
+state 313
+
+  230 set_constructor: LBRAC member_designator_list . RBRAC
+  232 member_designator_list: member_designator_list . comma member_designator
+
+    COMMA  shift, and go to state 95
+    RBRAC  shift, and go to state 345
+
+    comma  go to state 346
+
+
+state 314
+
+  233 member_designator_list: member_designator .
+  234 member_designator: member_designator . DOTDOT expression
+
+    DOTDOT  shift, and go to state 347
+
+    $default  reduce using rule 233 (member_designator_list)
+
+
+state 315
+
+  220 primary: LPAREN expression . RPAREN
+
+    RPAREN  shift, and go to state 348
+
+
+state 316
+
+  221 primary: NOT primary .
+
+    $default  reduce using rule 221 (primary)
+
+
+state 317
+
+  212 factor: sign factor .
+
+    $default  reduce using rule 212 (factor)
+
+
+state 318
+
+  188 case_statement: CASE case_index OF . case_list_element_list END
+  189               | CASE case_index OF . case_list_element_list SEMICOLON END
+  190               | CASE case_index OF . case_list_element_list semicolon otherwisepart statement END
+  191               | CASE case_index OF . case_list_element_list semicolon otherwisepart statement SEMICOLON END
+
+    CHARACTER_STRING  shift, and go to state 102
+    DIGSEQ            shift, and go to state 103
+    IDENTIFIER        shift, and go to state 8
+    MINUS             shift, and go to state 32
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 107
+
+    constant                go to state 262
+    sign                    go to state 112
+    non_string              go to state 113
+    case_constant_list      go to state 349
+    case_constant           go to state 266
+    case_list_element_list  go to state 350
+    case_list_element       go to state 351
+    identifier              go to state 159
+
+
+state 319
+
+  209 simple_expression: simple_expression addop . term
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LBRAC             shift, and go to state 271
+    LPAREN            shift, and go to state 272
+    MINUS             shift, and go to state 32
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 273
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 36
+
+    sign                 go to state 274
+    variable_access      go to state 275
+    indexed_variable     go to state 254
+    field_designator     go to state 255
+    term                 go to state 352
+    factor               go to state 280
+    exponentiation       go to state 281
+    primary              go to state 282
+    unsigned_constant    go to state 283
+    unsigned_number      go to state 45
+    unsigned_integer     go to state 46
+    unsigned_real        go to state 47
+    function_designator  go to state 284
+    set_constructor      go to state 285
+    identifier           go to state 286
+
+
+state 320
+
+  207 expression: simple_expression relop . simple_expression
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LBRAC             shift, and go to state 271
+    LPAREN            shift, and go to state 272
+    MINUS             shift, and go to state 32
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 273
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 36
+
+    sign                 go to state 274
+    variable_access      go to state 275
+    indexed_variable     go to state 254
+    field_designator     go to state 255
+    simple_expression    go to state 353
+    term                 go to state 279
+    factor               go to state 280
+    exponentiation       go to state 281
+    primary              go to state 282
+    unsigned_constant    go to state 283
+    unsigned_number      go to state 45
+    unsigned_integer     go to state 46
+    unsigned_real        go to state 47
+    function_designator  go to state 284
+    set_constructor      go to state 285
+    identifier           go to state 286
+
+
+state 321
+
+  211 term: term mulop . factor
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LBRAC             shift, and go to state 271
+    LPAREN            shift, and go to state 272
+    MINUS             shift, and go to state 32
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 273
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 36
+
+    sign                 go to state 274
+    variable_access      go to state 275
+    indexed_variable     go to state 254
+    field_designator     go to state 255
+    factor               go to state 354
+    exponentiation       go to state 281
+    primary              go to state 282
+    unsigned_constant    go to state 283
+    unsigned_number      go to state 45
+    unsigned_integer     go to state 46
+    unsigned_real        go to state 47
+    function_designator  go to state 284
+    set_constructor      go to state 285
+    identifier           go to state 286
+
+
+state 322
+
+  215 exponentiation: primary STARSTAR . exponentiation
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LBRAC             shift, and go to state 271
+    LPAREN            shift, and go to state 272
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 273
+    REALNUMBER        shift, and go to state 36
+
+    variable_access      go to state 275
+    indexed_variable     go to state 254
+    field_designator     go to state 255
+    exponentiation       go to state 355
+    primary              go to state 282
+    unsigned_constant    go to state 283
+    unsigned_number      go to state 45
+    unsigned_integer     go to state 46
+    unsigned_real        go to state 47
+    function_designator  go to state 284
+    set_constructor      go to state 285
+    identifier           go to state 286
+
+
+state 323
+
+  229 function_designator: identifier params .
+
+    $default  reduce using rule 229 (function_designator)
+
+
+state 324
+
+  162 open_for_statement: FOR control_variable ASSIGNMENT . initial_value direction final_value DO open_statement
+  163 closed_for_statement: FOR control_variable ASSIGNMENT . initial_value direction final_value DO closed_statement
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LBRAC             shift, and go to state 271
+    LPAREN            shift, and go to state 272
+    MINUS             shift, and go to state 32
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 273
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 36
+
+    sign                 go to state 274
+    variable_access      go to state 275
+    indexed_variable     go to state 254
+    field_designator     go to state 255
+    initial_value        go to state 356
+    expression           go to state 357
+    simple_expression    go to state 278
+    term                 go to state 279
+    factor               go to state 280
+    exponentiation       go to state 281
+    primary              go to state 282
+    unsigned_constant    go to state 283
+    unsigned_number      go to state 45
+    unsigned_integer     go to state 46
+    unsigned_real        go to state 47
+    function_designator  go to state 284
+    set_constructor      go to state 285
+    identifier           go to state 286
+
+
+state 325
+
+  166 open_if_statement: IF boolean_expression THEN . statement
+  167                  | IF boolean_expression THEN . closed_statement ELSE open_statement
+  168 closed_if_statement: IF boolean_expression THEN . closed_statement ELSE closed_statement
+
+    CASE        shift, and go to state 228
+    DIGSEQ      shift, and go to state 51
+    FOR         shift, and go to state 229
+    GOTO        shift, and go to state 230
+    IDENTIFIER  shift, and go to state 8
+    IF          shift, and go to state 231
+    PBEGIN      shift, and go to state 214
+    REPEAT      shift, and go to state 232
+    WHILE       shift, and go to state 233
+    WITH        shift, and go to state 234
+
+    $default  reduce using rule 154 (non_labeled_closed_statement)
+
+    label                         go to state 235
+    compound_statement            go to state 236
+    statement                     go to state 358
+    open_statement                go to state 239
+    closed_statement              go to state 359
+    non_labeled_closed_statement  go to state 241
+    non_labeled_open_statement    go to state 242
+    repeat_statement              go to state 243
+    open_while_statement          go to state 244
+    closed_while_statement        go to state 245
+    open_for_statement            go to state 246
+    closed_for_statement          go to state 247
+    open_with_statement           go to state 248
+    closed_with_statement         go to state 249
+    open_if_statement             go to state 250
+    closed_if_statement           go to state 251
+    assignment_statement          go to state 252
+    variable_access               go to state 253
+    indexed_variable              go to state 254
+    field_designator              go to state 255
+    procedure_statement           go to state 256
+    goto_statement                go to state 257
+    case_statement                go to state 258
+    identifier                    go to state 259
+
+
+state 326
+
+  159 repeat_statement: REPEAT statement_sequence UNTIL . boolean_expression
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LBRAC             shift, and go to state 271
+    LPAREN            shift, and go to state 272
+    MINUS             shift, and go to state 32
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 273
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 36
+
+    sign                 go to state 274
+    variable_access      go to state 275
+    indexed_variable     go to state 254
+    field_designator     go to state 255
+    boolean_expression   go to state 360
+    expression           go to state 291
+    simple_expression    go to state 278
+    term                 go to state 279
+    factor               go to state 280
+    exponentiation       go to state 281
+    primary              go to state 282
+    unsigned_constant    go to state 283
+    unsigned_number      go to state 45
+    unsigned_integer     go to state 46
+    unsigned_real        go to state 47
+    function_designator  go to state 284
+    set_constructor      go to state 285
+    identifier           go to state 286
+
+
+state 327
+
+  160 open_while_statement: WHILE boolean_expression DO . open_statement
+  161 closed_while_statement: WHILE boolean_expression DO . closed_statement
+
+    CASE        shift, and go to state 228
+    DIGSEQ      shift, and go to state 51
+    FOR         shift, and go to state 229
+    GOTO        shift, and go to state 230
+    IDENTIFIER  shift, and go to state 8
+    IF          shift, and go to state 231
+    PBEGIN      shift, and go to state 214
+    REPEAT      shift, and go to state 232
+    WHILE       shift, and go to state 233
+    WITH        shift, and go to state 234
+
+    $default  reduce using rule 154 (non_labeled_closed_statement)
+
+    label                         go to state 235
+    compound_statement            go to state 236
+    open_statement                go to state 361
+    closed_statement              go to state 362
+    non_labeled_closed_statement  go to state 241
+    non_labeled_open_statement    go to state 242
+    repeat_statement              go to state 243
+    open_while_statement          go to state 244
+    closed_while_statement        go to state 245
+    open_for_statement            go to state 246
+    closed_for_statement          go to state 247
+    open_with_statement           go to state 248
+    closed_with_statement         go to state 249
+    open_if_statement             go to state 250
+    closed_if_statement           go to state 251
+    assignment_statement          go to state 252
+    variable_access               go to state 253
+    indexed_variable              go to state 254
+    field_designator              go to state 255
+    procedure_statement           go to state 256
+    goto_statement                go to state 257
+    case_statement                go to state 258
+    identifier                    go to state 259
+
+
+state 328
+
+  164 open_with_statement: WITH record_variable_list DO . open_statement
+  165 closed_with_statement: WITH record_variable_list DO . closed_statement
+
+    CASE        shift, and go to state 228
+    DIGSEQ      shift, and go to state 51
+    FOR         shift, and go to state 229
+    GOTO        shift, and go to state 230
+    IDENTIFIER  shift, and go to state 8
+    IF          shift, and go to state 231
+    PBEGIN      shift, and go to state 214
+    REPEAT      shift, and go to state 232
+    WHILE       shift, and go to state 233
+    WITH        shift, and go to state 234
+
+    $default  reduce using rule 154 (non_labeled_closed_statement)
+
+    label                         go to state 235
+    compound_statement            go to state 236
+    open_statement                go to state 363
+    closed_statement              go to state 364
+    non_labeled_closed_statement  go to state 241
+    non_labeled_open_statement    go to state 242
+    repeat_statement              go to state 243
+    open_while_statement          go to state 244
+    closed_while_statement        go to state 245
+    open_for_statement            go to state 246
+    closed_for_statement          go to state 247
+    open_with_statement           go to state 248
+    closed_with_statement         go to state 249
+    open_if_statement             go to state 250
+    closed_if_statement           go to state 251
+    assignment_statement          go to state 252
+    variable_access               go to state 253
+    indexed_variable              go to state 254
+    field_designator              go to state 255
+    procedure_statement           go to state 256
+    goto_statement                go to state 257
+    case_statement                go to state 258
+    identifier                    go to state 259
+
+
+state 329
+
+  203 record_variable_list: record_variable_list comma . variable_access
+
+    IDENTIFIER  shift, and go to state 8
+
+    variable_access   go to state 365
+    indexed_variable  go to state 254
+    field_designator  go to state 255
+    identifier        go to state 296
+
+
+state 330
+
+  142 closed_statement: label COLON non_labeled_closed_statement .
+
+    $default  reduce using rule 142 (closed_statement)
+
+
+state 331
+
+  140 open_statement: label COLON non_labeled_open_statement .
+
+    $default  reduce using rule 140 (open_statement)
+
+
+state 332
+
+  136 statement_sequence: statement_sequence semicolon statement .
+
+    $default  reduce using rule 136 (statement_sequence)
+
+
+state 333
+
+  169 assignment_statement: variable_access ASSIGNMENT expression .
+
+    $default  reduce using rule 169 (assignment_statement)
+
+
+state 334
+
+  178 field_designator: variable_access DOT identifier .
+
+    $default  reduce using rule 178 (field_designator)
+
+
+state 335
+
+  174 indexed_variable: variable_access LBRAC index_expression_list . RBRAC
+  175 index_expression_list: index_expression_list . comma index_expression
+
+    COMMA  shift, and go to state 95
+    RBRAC  shift, and go to state 366
+
+    comma  go to state 367
+
+
+state 336
+
+  176 index_expression_list: index_expression .
+
+    $default  reduce using rule 176 (index_expression_list)
+
+
+state 337
+
+  177 index_expression: expression .
+
+    $default  reduce using rule 177 (index_expression)
+
+
+state 338
+
+  181 params: LPAREN actual_parameter_list . RPAREN
+  182 actual_parameter_list: actual_parameter_list . comma actual_parameter
+
+    COMMA   shift, and go to state 95
+    RPAREN  shift, and go to state 368
+
+    comma  go to state 369
+
+
+state 339
+
+  183 actual_parameter_list: actual_parameter .
+
+    $default  reduce using rule 183 (actual_parameter_list)
+
+
+state 340
+
+  184 actual_parameter: expression .
+  185                 | expression . COLON expression
+  186                 | expression . COLON expression COLON expression
+
+    COLON  shift, and go to state 370
+
+    $default  reduce using rule 184 (actual_parameter)
+
+
+state 341
+
+   88 case_constant: constant DOTDOT constant .
+
+    $default  reduce using rule 88 (case_constant)
+
+
+state 342
+
+   80 variant_list: variant_list semicolon variant .
+
+    $default  reduce using rule 80 (variant_list)
+
+
+state 343
+
+   82 variant: case_constant_list COLON LPAREN . record_section_list RPAREN
+   83        | case_constant_list COLON LPAREN . record_section_list semicolon variant_part RPAREN
+   84        | case_constant_list COLON LPAREN . variant_part RPAREN
+
+    CASE        shift, and go to state 149
+    IDENTIFIER  shift, and go to state 8
+
+    $default  reduce using rule 77 (variant_part)
+
+    identifier_list      go to state 150
+    record_section_list  go to state 371
+    record_section       go to state 152
+    variant_part         go to state 372
+    identifier           go to state 50
+
+
+state 344
+
+   85 case_constant_list: case_constant_list comma case_constant .
+
+    $default  reduce using rule 85 (case_constant_list)
+
+
+state 345
+
+  230 set_constructor: LBRAC member_designator_list RBRAC .
+
+    $default  reduce using rule 230 (set_constructor)
+
+
+state 346
+
+  232 member_designator_list: member_designator_list comma . member_designator
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LBRAC             shift, and go to state 271
+    LPAREN            shift, and go to state 272
+    MINUS             shift, and go to state 32
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 273
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 36
+
+    sign                 go to state 274
+    variable_access      go to state 275
+    indexed_variable     go to state 254
+    field_designator     go to state 255
+    expression           go to state 312
+    simple_expression    go to state 278
+    term                 go to state 279
+    factor               go to state 280
+    exponentiation       go to state 281
+    primary              go to state 282
+    unsigned_constant    go to state 283
+    unsigned_number      go to state 45
+    unsigned_integer     go to state 46
+    unsigned_real        go to state 47
+    function_designator  go to state 284
+    set_constructor      go to state 285
+    member_designator    go to state 373
+    identifier           go to state 286
+
+
+state 347
+
+  234 member_designator: member_designator DOTDOT . expression
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LBRAC             shift, and go to state 271
+    LPAREN            shift, and go to state 272
+    MINUS             shift, and go to state 32
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 273
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 36
+
+    sign                 go to state 274
+    variable_access      go to state 275
+    indexed_variable     go to state 254
+    field_designator     go to state 255
+    expression           go to state 374
+    simple_expression    go to state 278
+    term                 go to state 279
+    factor               go to state 280
+    exponentiation       go to state 281
+    primary              go to state 282
+    unsigned_constant    go to state 283
+    unsigned_number      go to state 45
+    unsigned_integer     go to state 46
+    unsigned_real        go to state 47
+    function_designator  go to state 284
+    set_constructor      go to state 285
+    identifier           go to state 286
+
+
+state 348
+
+  220 primary: LPAREN expression RPAREN .
+
+    $default  reduce using rule 220 (primary)
+
+
+state 349
+
+   85 case_constant_list: case_constant_list . comma case_constant
+  195 case_list_element: case_constant_list . COLON statement
+
+    COLON  shift, and go to state 375
+    COMMA  shift, and go to state 95
+
+    comma  go to state 310
+
+
+state 350
+
+  188 case_statement: CASE case_index OF case_list_element_list . END
+  189               | CASE case_index OF case_list_element_list . SEMICOLON END
+  190               | CASE case_index OF case_list_element_list . semicolon otherwisepart statement END
+  191               | CASE case_index OF case_list_element_list . semicolon otherwisepart statement SEMICOLON END
+  193 case_list_element_list: case_list_element_list . semicolon case_list_element
+
+    END        shift, and go to state 376
+    SEMICOLON  shift, and go to state 377
+
+    semicolon  go to state 378
+
+
+state 351
+
+  194 case_list_element_list: case_list_element .
+
+    $default  reduce using rule 194 (case_list_element_list)
+
+
+state 352
+
+  209 simple_expression: simple_expression addop term .
+  211 term: term . mulop factor
+
+    AND    shift, and go to state 87
+    DIV    shift, and go to state 88
+    MOD    shift, and go to state 89
+    SLASH  shift, and go to state 90
+    STAR   shift, and go to state 91
+
+    $default  reduce using rule 209 (simple_expression)
+
+    mulop  go to state 321
+
+
+state 353
+
+  207 expression: simple_expression relop simple_expression .
+  209 simple_expression: simple_expression . addop term
+
+    MINUS  shift, and go to state 81
+    OR     shift, and go to state 83
+    PLUS   shift, and go to state 84
+
+    $default  reduce using rule 207 (expression)
+
+    addop  go to state 319
+
+
+state 354
+
+  211 term: term mulop factor .
+
+    $default  reduce using rule 211 (term)
+
+
+state 355
+
+  215 exponentiation: primary STARSTAR exponentiation .
+
+    $default  reduce using rule 215 (exponentiation)
+
+
+state 356
+
+  162 open_for_statement: FOR control_variable ASSIGNMENT initial_value . direction final_value DO open_statement
+  163 closed_for_statement: FOR control_variable ASSIGNMENT initial_value . direction final_value DO closed_statement
+
+    DOWNTO  shift, and go to state 379
+    TO      shift, and go to state 380
+
+    direction  go to state 381
+
+
+state 357
+
+  199 initial_value: expression .
+
+    $default  reduce using rule 199 (initial_value)
+
+
+state 358
+
+  166 open_if_statement: IF boolean_expression THEN statement .
+
+    $default  reduce using rule 166 (open_if_statement)
+
+
+state 359
+
+  139 statement: closed_statement .
+  167 open_if_statement: IF boolean_expression THEN closed_statement . ELSE open_statement
+  168 closed_if_statement: IF boolean_expression THEN closed_statement . ELSE closed_statement
+
+    ELSE  shift, and go to state 382
+
+    $default  reduce using rule 139 (statement)
+
+
+state 360
+
+  159 repeat_statement: REPEAT statement_sequence UNTIL boolean_expression .
+
+    $default  reduce using rule 159 (repeat_statement)
+
+
+state 361
+
+  160 open_while_statement: WHILE boolean_expression DO open_statement .
+
+    $default  reduce using rule 160 (open_while_statement)
+
+
+state 362
+
+  161 closed_while_statement: WHILE boolean_expression DO closed_statement .
+
+    $default  reduce using rule 161 (closed_while_statement)
+
+
+state 363
+
+  164 open_with_statement: WITH record_variable_list DO open_statement .
+
+    $default  reduce using rule 164 (open_with_statement)
+
+
+state 364
+
+  165 closed_with_statement: WITH record_variable_list DO closed_statement .
+
+    $default  reduce using rule 165 (closed_with_statement)
+
+
+state 365
+
+  173 variable_access: variable_access . UPARROW
+  174 indexed_variable: variable_access . LBRAC index_expression_list RBRAC
+  178 field_designator: variable_access . DOT identifier
+  203 record_variable_list: record_variable_list comma variable_access .
+
+    DOT      shift, and go to state 301
+    LBRAC    shift, and go to state 302
+    UPARROW  shift, and go to state 303
+
+    $default  reduce using rule 203 (record_variable_list)
+
+
+state 366
+
+  174 indexed_variable: variable_access LBRAC index_expression_list RBRAC .
+
+    $default  reduce using rule 174 (indexed_variable)
+
+
+state 367
+
+  175 index_expression_list: index_expression_list comma . index_expression
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LBRAC             shift, and go to state 271
+    LPAREN            shift, and go to state 272
+    MINUS             shift, and go to state 32
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 273
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 36
+
+    sign                 go to state 274
+    variable_access      go to state 275
+    indexed_variable     go to state 254
+    index_expression     go to state 383
+    field_designator     go to state 255
+    expression           go to state 337
+    simple_expression    go to state 278
+    term                 go to state 279
+    factor               go to state 280
+    exponentiation       go to state 281
+    primary              go to state 282
+    unsigned_constant    go to state 283
+    unsigned_number      go to state 45
+    unsigned_integer     go to state 46
+    unsigned_real        go to state 47
+    function_designator  go to state 284
+    set_constructor      go to state 285
+    identifier           go to state 286
+
+
+state 368
+
+  181 params: LPAREN actual_parameter_list RPAREN .
+
+    $default  reduce using rule 181 (params)
+
+
+state 369
+
+  182 actual_parameter_list: actual_parameter_list comma . actual_parameter
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LBRAC             shift, and go to state 271
+    LPAREN            shift, and go to state 272
+    MINUS             shift, and go to state 32
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 273
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 36
+
+    sign                 go to state 274
+    variable_access      go to state 275
+    indexed_variable     go to state 254
+    field_designator     go to state 255
+    actual_parameter     go to state 384
+    expression           go to state 340
+    simple_expression    go to state 278
+    term                 go to state 279
+    factor               go to state 280
+    exponentiation       go to state 281
+    primary              go to state 282
+    unsigned_constant    go to state 283
+    unsigned_number      go to state 45
+    unsigned_integer     go to state 46
+    unsigned_real        go to state 47
+    function_designator  go to state 284
+    set_constructor      go to state 285
+    identifier           go to state 286
+
+
+state 370
+
+  185 actual_parameter: expression COLON . expression
+  186                 | expression COLON . expression COLON expression
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LBRAC             shift, and go to state 271
+    LPAREN            shift, and go to state 272
+    MINUS             shift, and go to state 32
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 273
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 36
+
+    sign                 go to state 274
+    variable_access      go to state 275
+    indexed_variable     go to state 254
+    field_designator     go to state 255
+    expression           go to state 385
+    simple_expression    go to state 278
+    term                 go to state 279
+    factor               go to state 280
+    exponentiation       go to state 281
+    primary              go to state 282
+    unsigned_constant    go to state 283
+    unsigned_number      go to state 45
+    unsigned_integer     go to state 46
+    unsigned_real        go to state 47
+    function_designator  go to state 284
+    set_constructor      go to state 285
+    identifier           go to state 286
+
+
+state 371
+
+   72 record_section_list: record_section_list . semicolon record_section
+   82 variant: case_constant_list COLON LPAREN record_section_list . RPAREN
+   83        | case_constant_list COLON LPAREN record_section_list . semicolon variant_part RPAREN
+
+    RPAREN     shift, and go to state 386
+    SEMICOLON  shift, and go to state 14
+
+    semicolon  go to state 387
+
+
+state 372
+
+   84 variant: case_constant_list COLON LPAREN variant_part . RPAREN
+
+    RPAREN  shift, and go to state 388
+
+
+state 373
+
+  232 member_designator_list: member_designator_list comma member_designator .
+  234 member_designator: member_designator . DOTDOT expression
+
+    DOTDOT  shift, and go to state 347
+
+    $default  reduce using rule 232 (member_designator_list)
+
+
+state 374
+
+  234 member_designator: member_designator DOTDOT expression .
+
+    $default  reduce using rule 234 (member_designator)
+
+
+state 375
+
+  195 case_list_element: case_constant_list COLON . statement
+
+    CASE        shift, and go to state 228
+    DIGSEQ      shift, and go to state 51
+    FOR         shift, and go to state 229
+    GOTO        shift, and go to state 230
+    IDENTIFIER  shift, and go to state 8
+    IF          shift, and go to state 231
+    PBEGIN      shift, and go to state 214
+    REPEAT      shift, and go to state 232
+    WHILE       shift, and go to state 233
+    WITH        shift, and go to state 234
+
+    $default  reduce using rule 154 (non_labeled_closed_statement)
+
+    label                         go to state 235
+    compound_statement            go to state 236
+    statement                     go to state 389
+    open_statement                go to state 239
+    closed_statement              go to state 240
+    non_labeled_closed_statement  go to state 241
+    non_labeled_open_statement    go to state 242
+    repeat_statement              go to state 243
+    open_while_statement          go to state 244
+    closed_while_statement        go to state 245
+    open_for_statement            go to state 246
+    closed_for_statement          go to state 247
+    open_with_statement           go to state 248
+    closed_with_statement         go to state 249
+    open_if_statement             go to state 250
+    closed_if_statement           go to state 251
+    assignment_statement          go to state 252
+    variable_access               go to state 253
+    indexed_variable              go to state 254
+    field_designator              go to state 255
+    procedure_statement           go to state 256
+    goto_statement                go to state 257
+    case_statement                go to state 258
+    identifier                    go to state 259
+
+
+state 376
+
+  188 case_statement: CASE case_index OF case_list_element_list END .
+
+    $default  reduce using rule 188 (case_statement)
+
+
+state 377
+
+  189 case_statement: CASE case_index OF case_list_element_list SEMICOLON . END
+  252 semicolon: SEMICOLON .
+
+    END  shift, and go to state 390
+
+    $default  reduce using rule 252 (semicolon)
+
+
+state 378
+
+  190 case_statement: CASE case_index OF case_list_element_list semicolon . otherwisepart statement END
+  191               | CASE case_index OF case_list_element_list semicolon . otherwisepart statement SEMICOLON END
+  193 case_list_element_list: case_list_element_list semicolon . case_list_element
+
+    CHARACTER_STRING  shift, and go to state 102
+    DIGSEQ            shift, and go to state 103
+    IDENTIFIER        shift, and go to state 8
+    MINUS             shift, and go to state 32
+    OTHERWISE         shift, and go to state 391
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 107
+
+    constant            go to state 262
+    sign                go to state 112
+    non_string          go to state 113
+    case_constant_list  go to state 349
+    case_constant       go to state 266
+    case_list_element   go to state 392
+    otherwisepart       go to state 393
+    identifier          go to state 159
+
+
+state 379
+
+  201 direction: DOWNTO .
+
+    $default  reduce using rule 201 (direction)
+
+
+state 380
+
+  200 direction: TO .
+
+    $default  reduce using rule 200 (direction)
+
+
+state 381
+
+  162 open_for_statement: FOR control_variable ASSIGNMENT initial_value direction . final_value DO open_statement
+  163 closed_for_statement: FOR control_variable ASSIGNMENT initial_value direction . final_value DO closed_statement
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LBRAC             shift, and go to state 271
+    LPAREN            shift, and go to state 272
+    MINUS             shift, and go to state 32
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 273
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 36
+
+    sign                 go to state 274
+    variable_access      go to state 275
+    indexed_variable     go to state 254
+    field_designator     go to state 255
+    final_value          go to state 394
+    expression           go to state 395
+    simple_expression    go to state 278
+    term                 go to state 279
+    factor               go to state 280
+    exponentiation       go to state 281
+    primary              go to state 282
+    unsigned_constant    go to state 283
+    unsigned_number      go to state 45
+    unsigned_integer     go to state 46
+    unsigned_real        go to state 47
+    function_designator  go to state 284
+    set_constructor      go to state 285
+    identifier           go to state 286
+
+
+state 382
+
+  167 open_if_statement: IF boolean_expression THEN closed_statement ELSE . open_statement
+  168 closed_if_statement: IF boolean_expression THEN closed_statement ELSE . closed_statement
+
+    CASE        shift, and go to state 228
+    DIGSEQ      shift, and go to state 51
+    FOR         shift, and go to state 229
+    GOTO        shift, and go to state 230
+    IDENTIFIER  shift, and go to state 8
+    IF          shift, and go to state 231
+    PBEGIN      shift, and go to state 214
+    REPEAT      shift, and go to state 232
+    WHILE       shift, and go to state 233
+    WITH        shift, and go to state 234
+
+    $default  reduce using rule 154 (non_labeled_closed_statement)
+
+    label                         go to state 235
+    compound_statement            go to state 236
+    open_statement                go to state 396
+    closed_statement              go to state 397
+    non_labeled_closed_statement  go to state 241
+    non_labeled_open_statement    go to state 242
+    repeat_statement              go to state 243
+    open_while_statement          go to state 244
+    closed_while_statement        go to state 245
+    open_for_statement            go to state 246
+    closed_for_statement          go to state 247
+    open_with_statement           go to state 248
+    closed_with_statement         go to state 249
+    open_if_statement             go to state 250
+    closed_if_statement           go to state 251
+    assignment_statement          go to state 252
+    variable_access               go to state 253
+    indexed_variable              go to state 254
+    field_designator              go to state 255
+    procedure_statement           go to state 256
+    goto_statement                go to state 257
+    case_statement                go to state 258
+    identifier                    go to state 259
+
+
+state 383
+
+  175 index_expression_list: index_expression_list comma index_expression .
+
+    $default  reduce using rule 175 (index_expression_list)
+
+
+state 384
+
+  182 actual_parameter_list: actual_parameter_list comma actual_parameter .
+
+    $default  reduce using rule 182 (actual_parameter_list)
+
+
+state 385
+
+  185 actual_parameter: expression COLON expression .
+  186                 | expression COLON expression . COLON expression
+
+    COLON  shift, and go to state 398
+
+    $default  reduce using rule 185 (actual_parameter)
+
+
+state 386
+
+   82 variant: case_constant_list COLON LPAREN record_section_list RPAREN .
+
+    $default  reduce using rule 82 (variant)
+
+
+state 387
+
+   72 record_section_list: record_section_list semicolon . record_section
+   83 variant: case_constant_list COLON LPAREN record_section_list semicolon . variant_part RPAREN
+
+    CASE        shift, and go to state 149
+    IDENTIFIER  shift, and go to state 8
+
+    $default  reduce using rule 77 (variant_part)
+
+    identifier_list  go to state 150
+    record_section   go to state 222
+    variant_part     go to state 399
+    identifier       go to state 50
+
+
+state 388
+
+   84 variant: case_constant_list COLON LPAREN variant_part RPAREN .
+
+    $default  reduce using rule 84 (variant)
+
+
+state 389
+
+  195 case_list_element: case_constant_list COLON statement .
+
+    $default  reduce using rule 195 (case_list_element)
+
+
+state 390
+
+  189 case_statement: CASE case_index OF case_list_element_list SEMICOLON END .
+
+    $default  reduce using rule 189 (case_statement)
+
+
+state 391
+
+  196 otherwisepart: OTHERWISE .
+  197              | OTHERWISE . COLON
+
+    COLON  shift, and go to state 400
+
+    $default  reduce using rule 196 (otherwisepart)
+
+
+state 392
+
+  193 case_list_element_list: case_list_element_list semicolon case_list_element .
+
+    $default  reduce using rule 193 (case_list_element_list)
+
+
+state 393
+
+  190 case_statement: CASE case_index OF case_list_element_list semicolon otherwisepart . statement END
+  191               | CASE case_index OF case_list_element_list semicolon otherwisepart . statement SEMICOLON END
+
+    CASE        shift, and go to state 228
+    DIGSEQ      shift, and go to state 51
+    FOR         shift, and go to state 229
+    GOTO        shift, and go to state 230
+    IDENTIFIER  shift, and go to state 8
+    IF          shift, and go to state 231
+    PBEGIN      shift, and go to state 214
+    REPEAT      shift, and go to state 232
+    WHILE       shift, and go to state 233
+    WITH        shift, and go to state 234
+
+    $default  reduce using rule 154 (non_labeled_closed_statement)
+
+    label                         go to state 235
+    compound_statement            go to state 236
+    statement                     go to state 401
+    open_statement                go to state 239
+    closed_statement              go to state 240
+    non_labeled_closed_statement  go to state 241
+    non_labeled_open_statement    go to state 242
+    repeat_statement              go to state 243
+    open_while_statement          go to state 244
+    closed_while_statement        go to state 245
+    open_for_statement            go to state 246
+    closed_for_statement          go to state 247
+    open_with_statement           go to state 248
+    closed_with_statement         go to state 249
+    open_if_statement             go to state 250
+    closed_if_statement           go to state 251
+    assignment_statement          go to state 252
+    variable_access               go to state 253
+    indexed_variable              go to state 254
+    field_designator              go to state 255
+    procedure_statement           go to state 256
+    goto_statement                go to state 257
+    case_statement                go to state 258
+    identifier                    go to state 259
+
+
+state 394
+
+  162 open_for_statement: FOR control_variable ASSIGNMENT initial_value direction final_value . DO open_statement
+  163 closed_for_statement: FOR control_variable ASSIGNMENT initial_value direction final_value . DO closed_statement
+
+    DO  shift, and go to state 402
+
+
+state 395
+
+  202 final_value: expression .
+
+    $default  reduce using rule 202 (final_value)
+
+
+state 396
+
+  167 open_if_statement: IF boolean_expression THEN closed_statement ELSE open_statement .
+
+    $default  reduce using rule 167 (open_if_statement)
+
+
+state 397
+
+  168 closed_if_statement: IF boolean_expression THEN closed_statement ELSE closed_statement .
+
+    $default  reduce using rule 168 (closed_if_statement)
+
+
+state 398
+
+  186 actual_parameter: expression COLON expression COLON . expression
+
+    CHARACTER_STRING  shift, and go to state 29
+    DIGSEQ            shift, and go to state 30
+    IDENTIFIER        shift, and go to state 8
+    LBRAC             shift, and go to state 271
+    LPAREN            shift, and go to state 272
+    MINUS             shift, and go to state 32
+    NIL               shift, and go to state 33
+    NOT               shift, and go to state 273
+    PLUS              shift, and go to state 35
+    REALNUMBER        shift, and go to state 36
+
+    sign                 go to state 274
+    variable_access      go to state 275
+    indexed_variable     go to state 254
+    field_designator     go to state 255
+    expression           go to state 403
+    simple_expression    go to state 278
+    term                 go to state 279
+    factor               go to state 280
+    exponentiation       go to state 281
+    primary              go to state 282
+    unsigned_constant    go to state 283
+    unsigned_number      go to state 45
+    unsigned_integer     go to state 46
+    unsigned_real        go to state 47
+    function_designator  go to state 284
+    set_constructor      go to state 285
+    identifier           go to state 286
+
+
+state 399
+
+   83 variant: case_constant_list COLON LPAREN record_section_list semicolon variant_part . RPAREN
+
+    RPAREN  shift, and go to state 404
+
+
+state 400
+
+  197 otherwisepart: OTHERWISE COLON .
+
+    $default  reduce using rule 197 (otherwisepart)
+
+
+state 401
+
+  190 case_statement: CASE case_index OF case_list_element_list semicolon otherwisepart statement . END
+  191               | CASE case_index OF case_list_element_list semicolon otherwisepart statement . SEMICOLON END
+
+    END        shift, and go to state 405
+    SEMICOLON  shift, and go to state 406
+
+
+state 402
+
+  162 open_for_statement: FOR control_variable ASSIGNMENT initial_value direction final_value DO . open_statement
+  163 closed_for_statement: FOR control_variable ASSIGNMENT initial_value direction final_value DO . closed_statement
+
+    CASE        shift, and go to state 228
+    DIGSEQ      shift, and go to state 51
+    FOR         shift, and go to state 229
+    GOTO        shift, and go to state 230
+    IDENTIFIER  shift, and go to state 8
+    IF          shift, and go to state 231
+    PBEGIN      shift, and go to state 214
+    REPEAT      shift, and go to state 232
+    WHILE       shift, and go to state 233
+    WITH        shift, and go to state 234
+
+    $default  reduce using rule 154 (non_labeled_closed_statement)
+
+    label                         go to state 235
+    compound_statement            go to state 236
+    open_statement                go to state 407
+    closed_statement              go to state 408
+    non_labeled_closed_statement  go to state 241
+    non_labeled_open_statement    go to state 242
+    repeat_statement              go to state 243
+    open_while_statement          go to state 244
+    closed_while_statement        go to state 245
+    open_for_statement            go to state 246
+    closed_for_statement          go to state 247
+    open_with_statement           go to state 248
+    closed_with_statement         go to state 249
+    open_if_statement             go to state 250
+    closed_if_statement           go to state 251
+    assignment_statement          go to state 252
+    variable_access               go to state 253
+    indexed_variable              go to state 254
+    field_designator              go to state 255
+    procedure_statement           go to state 256
+    goto_statement                go to state 257
+    case_statement                go to state 258
+    identifier                    go to state 259
+
+
+state 403
+
+  186 actual_parameter: expression COLON expression COLON expression .
+
+    $default  reduce using rule 186 (actual_parameter)
+
+
+state 404
+
+   83 variant: case_constant_list COLON LPAREN record_section_list semicolon variant_part RPAREN .
+
+    $default  reduce using rule 83 (variant)
+
+
+state 405
+
+  190 case_statement: CASE case_index OF case_list_element_list semicolon otherwisepart statement END .
+
+    $default  reduce using rule 190 (case_statement)
+
+
+state 406
+
+  191 case_statement: CASE case_index OF case_list_element_list semicolon otherwisepart statement SEMICOLON . END
+
+    END  shift, and go to state 409
+
+
+state 407
+
+  162 open_for_statement: FOR control_variable ASSIGNMENT initial_value direction final_value DO open_statement .
+
+    $default  reduce using rule 162 (open_for_statement)
+
+
+state 408
+
+  163 closed_for_statement: FOR control_variable ASSIGNMENT initial_value direction final_value DO closed_statement .
+
+    $default  reduce using rule 163 (closed_for_statement)
+
+
+state 409
+
+  191 case_statement: CASE case_index OF case_list_element_list semicolon otherwisepart statement SEMICOLON END .
+
+    $default  reduce using rule 191 (case_statement)
