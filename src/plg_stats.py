@@ -67,4 +67,51 @@ def plot_fit(data, x_key, y_key) :
     plt.text(x_coord, y_coord, 'Pearson r = %.2f\nP value = %.2f' %(r, p))
     plt.show()
 
+def anova_oneway (data, val_key, group_key, treatment_group=None) :
+    """ performs a 1-way anova (equivalent to a student's t-test for
+    only two groups)"""
 
+    import scipy.stats as sst
+    import numpy as np
+    import pylab
+
+    # First we must divide up the groups
+    groups = {}
+    for vector in data :
+        if vector[group_key] not in groups.keys() :
+            print 'Found new group:', vector[group_key]
+            groups[vector[group_key]] = []
+
+        groups[vector[group_key]].append(vector[val_key])
+
+    for g in groups.keys() :
+        groups[g] = np.array(doublize(groups[g]))
+
+        print 'Group', g
+        print groups[g]
+
+    # Do the statistics
+    f, p = sst.f_oneway(*groups.values())
+
+    # Plot the graph
+    labels = groups.keys()
+    for l in range(0, len(labels)) :
+        label = labels[l]
+        pylab.plot([l]*len(groups[label]), groups[label], "x")
+        mean = groups[label].mean()
+        pylab.plot(l, mean, "ro")
+        pylab.text((l+.1), mean, 'Group "%s"\nMean %.4f' %(label, mean))
+
+    pylab.ylabel(val_key)
+    pylab.xlabel(group_key)
+    pylab.xticks(range(-1, len(labels)+1), [''] + labels + [''])
+
+    # Print the statistics
+    yt = pylab.yticks()[0]
+    info_y = yt[0] + (yt.max() - yt.min()) * 5/6
+    info_x = -.9
+    pylab.text(info_x, info_y, 'F value %.2f\np value %.4f' %(f, p))
+
+    pylab.show()
+
+    return f, p
