@@ -45,3 +45,14 @@ General notes:
 
 10/16/12
     It looks like Antlr uses LL(1) grammars, wheras YACC/Bison use LALR grammars.  As such, I would not expect a .y file to work for antlr, or a .g file to work with bison.  It might eventually be interesting to look at the difference between the same language implemented in different ways, but for now I'm not going to bother with antlr - it only adds another variable.
+
+11/6/12
+PLGraph current goals:
+
+Right now, it's all about the statistics.
+
+I don't really know what I need to know, is the thing.  How can I decide what tests to run?  Well, that's what the hypothesis is for.  You say, I expect that we'll see this, because this, and then you test to see whether or not you see that.
+
+And right now I don't have a hypothesis.  Which is partly because I don't know the data, but it's partly because I don't know what I want to know.
+
+So the question is: is there any useful information contained in the transition graph of a language?  How does the high-level design of the language affect the graphs, and (eventually) how does this change the compiler.  And perhaps most importantly, is there more variation between different languages than there is between different implementations of the same language?

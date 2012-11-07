@@ -1,4 +1,4 @@
-Language	Original Release	Age	Purpose	Dynamic/Static typing	Object-Oriented	C-based	Paradigm	Compiled/Interpreted/Both	Number of nodes	Number of edges	Edge density	Average clustering	Average shortest path length	Degree correlation coef
+Language	Original Release	Age	Purpose	Typing	Object-Oriented	C-based	Paradigm	Runtime	Nodes	Edges	Edge density	Clustering coef	Mean SPL	Degree corr. coef
 C	1973	39	System programming	Static	No	Yes	Imperative	Compiled	350	2988	8	0.1332683662	1.4111256652	0.0484499705
 Java scan	1995	17	Applications	Static	Yes	Yes	Imperative	Compiled	616	6433	10	0.1325331811	2.634214972	0.0673361348
 Java full	1995	17	Applications	Static	Yes	Yes	Imperative	Compiled	787	6940	8	0.101798536	2.1098302246	0.0876182427

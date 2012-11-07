@@ -99,8 +99,10 @@ def anova_oneway (data, val_key, group_key, treatment_group=None) :
         label = labels[l]
         pylab.plot([l]*len(groups[label]), groups[label], "x")
         mean = groups[label].mean()
+        size = len(groups[label])
         pylab.plot(l, mean, "ro")
-        pylab.text((l+.1), mean, 'Group "%s"\nMean %.4f' %(label, mean))
+        pylab.text((l+.1), mean, 'Group "%s"\nMean %.4f\n(%d values)'
+                %(label, mean, size))
 
     pylab.ylabel(val_key)
     pylab.xlabel(group_key)
