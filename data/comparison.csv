@@ -1,24 +1,14 @@
-Language	C	Java scan	Java full	R	Octave	Bash	Perl	Awk	Ruby	Open Cobol	Q pascal	GNU Pascal	PHP	Min	Max	Avg	Stddev
-Original Release	1973	1995	1995	1993	1988	1989	1987	1977	1995	1959	1970	1970					
-Current Release	1995	2003	2003	2012	2012	2012	2012	2012	2012	2002		2012					
-Purpose	System programming	Applications	Applications	Numeric	Numeric	Scripting	Scripting	Scripting	Applications	Applications	Applications	Applications	Web				
-Dynamic/Static typing	Static	Static	Static	Dynamic	Dynamic	Dynamic	Dynamic	None	Dynamic	Static	Static	Static					
-Object-Oriented	No	Yes	Yes	Yes	Yes	No	Yes	No	Yes	Yes	No	No					
-C-based	Yes	Yes	Yes	No	No	No	Yes	No	No	No	No	No					
-Paradigm	Imperative	Imperative	Imperative	Mulit	Imperative	Imperative	Multi	Event Driven	Multi	Imperative	Imperative	Imperative					
-Compiled/Interpreted/Both	Compiled	Compiled	Compiled	Interpreted	Interpreted	Interpreted	Interpreted	Interpreted	Interpreted	Compiled	Compiled	Compiled					
-Number of nodes	350	616	787	163	499	334	449	330	991	2240	410	1279	983				
-Number of edges	2988	6433	6940	1763	4681	1545	6275	2497	17561	6615	1836	12124	12884				
-Edge density	8	10	8	10	9	4	13	7	17	2	4	9	13				
-Average clustering	0.1332683662	0.1325331811	0.101798536	0.1283051109	0.0953699305	0.0481169103	0.1540995017	0.0818747031	0.1053768152	0.0635355042	0.0982208653	0.0494579966	0.0910634796				
-Average shortest path length	1.4111256652	2.634214972	2.1098302246	1.9842460047	2.4353284883	1.7919476363	3.4998061168	1.2415584416	1.866285458	0.8230904661	0.6513149264	1.1377512753	5.0248833013				
-Degree correlation coef	0.0484499705	0.0673361348	0.0876182427	0.0036017181	0.0684202134	0.5153934171	0.5757617134	0.2604709544	0.5900450487	0.0874233951	0.133607306	0.277729718	0.5861423083				
-																	
-																	
-																	
-	Number of nodes	983															
-	Number of edges	12884															
-	Edge density	13															
-	Average clustering	0.0910634796															
-	Average shortest path length	5.0248833013															
-	Degree correlation coef	0.5861423083															
+Language	Original Release	Age	Purpose	Typing	Object-Oriented	C-based	Paradigm	Runtime	Nodes	Edges	Edge density	Clustering coef	Mean SPL	Degree corr. coef
+C	1973	39	System programming	Static	No	Yes	Imperative	Compiled	350	2988	8	0.1332683662	1.4111256652	0.0484499705
+Java scan	1995	17	Applications	Static	Yes	Yes	Imperative	Compiled	616	6433	10	0.1325331811	2.634214972	0.0673361348
+Java full	1995	17	Applications	Static	Yes	Yes	Imperative	Compiled	787	6940	8	0.101798536	2.1098302246	0.0876182427
+R	1993	19	Numeric	Dynamic	Yes	No	Mulit	Interpreted	163	1763	10	0.1283051109	1.9842460047	0.0036017181
+Octave	1988	24	Numeric	Dynamic	Yes	No	Imperative	Interpreted	499	4681	9	0.0953699305	2.4353284883	0.0684202134
+Bash	1989	23	Scripting	Dynamic	No	No	Imperative	Interpreted	334	1545	4	0.0481169103	1.7919476363	0.5153934171
+Perl	1987	25	Scripting	Dynamic	Yes	Yes	Multi	Interpreted	449	6275	13	0.1540995017	3.4998061168	0.5757617134
+Awk	1977	35	Scripting	None	No	No	Event Driven	Interpreted	330	2497	7	0.0818747031	1.2415584416	0.2604709544
+Ruby	1995	17	Applications	Dynamic	Yes	No	Multi	Interpreted	991	17561	17	0.1053768152	1.866285458	0.5900450487
+Open Cobol	1959	53	Applications	Static	Yes	No	Imperative	Compiled	2240	6615	2	0.0635355042	0.8230904661	0.0874233951
+Q pascal	1970	42	Applications	Static	No	No	Imperative	Compiled	410	1836	4	0.0982208653	0.6513149264	0.133607306
+GNU Pascal	1970	42	Applications	Static	No	No	Imperative	Compiled	1279	12124	9	0.0494579966	1.1377512753	0.277729718
+PHP	1995	17	Web	Dynamic	Yes	No	Imperative	Compiled	983	12884	13	0.0910634796	5.0248833013	0.5861423083
