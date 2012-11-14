@@ -1,14 +1,14 @@
 "Language"	"Version"	"Released"	"Age"	"Purpose"	"Typing"	"OO"	"C-based"	"Paradigm"	"Runtime"	"Nodes"	"Edges"	"Density"	"Clustering"	"Mean SPL"	"Deg Cor"
 "Awk"	"GNU"	1977	35	"Scripting"	"None"	"No"	"No"	"Event Driven"	"Interpreted"	324	2491	7.6882716049	0.0876969769	1.235122119	0.2551796702
 "Bash"	"GNU"	1989	23	"Scripting"	"Dynamic"	"No"	"No"	"Imperative"	"Interpreted"	334	1545	4.625748503	0.0481169103	1.7919476363	0.5153934171
-"C"	"ANSI"	1973	39	"Systems"	"Static"	"No"	"Yes"	"Imperative"	"Compiled"	350	2988	8.5371428571	0.1332683662	1.4111256652	0.0484499705
-"C"	"GCC"	1973	39	"Systems"	"Static"	"No"	"Yes"	"Imperative"	"Compiled"	854	5968	6.9882903981	0.0914002227	3.6614566031	0.217556601
+"C"	"ANSI"	1972	40	"Systems"	"Static"	"No"	"Yes"	"Imperative"	"Compiled"	350	2988	8.5371428571	0.1332683662	1.4111256652	0.0484499705
+"C"	"GCC"	1972	40	"Systems"	"Static"	"No"	"Yes"	"Imperative"	"Compiled"	854	5968	6.9882903981	0.0914002227	3.6614566031	0.217556601
 "C++"	"GCC"	1983	29	"Systems"	"Static"	"Yes"	"Yes"	"Imperative"	"Compiled"	1764	25111	14.235260771	0.0914878252	2.7862589922	0.3464785785
 "Cobol"	"Open"	1959	53	"Applications"	"Static"	"Yes"	"No"	"Imperative"	"Compiled"	2240	6615	2.953125	0.0635355042	0.8230904661	0.0874233951
 "Cobol"	"Tiny"	1959	53	"Applications"	"Static"	"Yes"	"No"	"Imperative"	"Compiled"	1851	9107	4.9200432199	0.0500297147	0.581001942	-0.2920350647
 "Java"	"GCC full"	1995	17	"Applications"	"Static"	"Yes"	"Yes"	"Imperative"	"Compiled"	775	6928	8.9393548387	0.1037894576	1.9674651996	0.0822185545
 "Java"	"GCC scan"	1995	17	"Applications"	"Static"	"Yes"	"Yes"	"Imperative"	"Compiled"	607	6424	10.5831960461	0.1353559893	2.5049341837	0.0626263143
-"ObjectiveC"	"GCC"	1983	29	"Applications"	"Static"	"Yes"	"Yes"	"Imperative"	"Compiled"	1105	8710	7.8823529412	0.0950050569	2.8240064922	0.2634594456
+"ObjectiveC"	"GCC"	1983	29	"Applications"	"Static"	"Yes"	"Yes"	"Reflective"	"Compiled"	1105	8710	7.8823529412	0.0950050569	2.8240064922	0.2634594456
 "Octave"	"GNU"	1988	24	"Numeric"	"Dynamic"	"Yes"	"No"	"Imperative"	"Interpreted"	499	4681	9.3807615231	0.0953699305	2.4353284883	0.0684202134
 "Pascal"	"GNU"	1970	42	"Applications"	"Static"	"No"	"No"	"Imperative"	"Compiled"	1229	13500	10.9845402766	0.0443476084	0.8442061155	0.1634301154
 "Pascal"	"Q"	1970	42	"Applications"	"Static"	"No"	"No"	"Imperative"	"Compiled"	410	1836	4.4780487805	0.0982208653	0.6513149264	0.133607306
@@ -16,3 +16,4 @@
 "PHP"	"Standard"	1995	17	"Web"	"Dynamic"	"Yes"	"No"	"Imperative"	"Compiled"	910	14743	16.2010989011	0.1049075046	3.8384301068	0.4223188626
 "R"	"Standard"	1993	19	"Numeric"	"Dynamic"	"Yes"	"No"	"Mulit"	"Interpreted"	163	1763	10.8159509202	0.1283051109	1.9842460047	0.0036017181
 "Ruby"	"Standard"	1995	17	"Applications"	"Dynamic"	"Yes"	"No"	"Multi"	"Interpreted"	958	18098	18.891440501	0.1279675015	1.55671647	0.5756758206
+"Smalltalk"	"GNU"	1972	40	"Applications"	"Dynamic"	"Yes"	"No"	"Reflective"	"Compiled"	195	745	3.8205128205	0.1519885542	0.5902987047	0.6029433347

@@ -1,0 +1,2644 @@
+Grammar
+
+    0 $accept: program $end
+
+    1 program: internal_marker method
+    2        | file_in
+    3        | /* empty */
+
+    4 internal_marker: INTERNAL_TOKEN
+
+    5 file_in: doit_and_method_list
+    6        | file_in doit_and_method_list
+
+    7 doit_and_method_list: doit
+    8                     | doit internal_marker method_list '!'
+
+    9 doit: temporaries statements '!'
+   10     | error '!'
+
+   11 method_list: method '!' method_list
+   12            | error '!'
+   13            | /* empty */
+
+   14 method: message_pattern temporaries primitive statements
+
+   15 message_pattern: unary_selector
+   16                | binary_selector variable_name
+   17                | keyword_variable_list
+
+   18 unary_selector: "identifier"
+
+   19 binary_selector: "binary message"
+   20                | '|'
+
+   21 variable_name: "identifier"
+
+   22 keyword_variable_list: keyword variable_name
+   23                      | keyword_variable_list keyword variable_name
+
+   24 keyword: "keyword message"
+
+   25 primitive: /* empty */
+   26          | "<primitive: ...>" "identifier" primitive_end
+
+   27 primitive_end: "binary message"
+
+   28 temporaries: /* empty */
+   29            | '|' '|'
+   30            | '|' variable_names '|'
+
+   31 variable_names: variable_name
+   32               | variable_names variable_name
+
+   33 statements: /* empty */
+   34           | return_statement optional_dot
+   35           | statements.1 optional_dot
+   36           | statements.1 '.' return_statement optional_dot
+
+   37 statements.1: statement
+   38             | statements.1 '.' statement
+   39             | statements.1 '.' error
+
+   40 optional_dot: /* empty */
+   41             | '.'
+
+   42 statement: expression
+
+   43 return_statement: '^' expression
+
+   44 expression: simple_expression
+   45           | assigns simple_expression
+
+   46 assigns: variable_primary "'_' or ':='"
+   47        | assigns variable_primary "'_' or ':='"
+
+   48 simple_expression: primary
+   49                  | message_expression
+   50                  | cascaded_message_expression
+
+   51 primary: variable_primary
+   52        | literal
+   53        | block
+   54        | array_constructor
+   55        | '(' error '!'
+   56        | '(' error ')'
+   57        | '(' expression ')'
+
+   58 variable_primary: "identifier"
+   59                 | variable_primary "'.' or '::'" "identifier"
+
+   60 literal: number
+   61        | small_number
+   62        | symbol_constant
+   63        | character_constant
+   64        | string
+   65        | array_constant
+   66        | variable_binding
+   67        | compile_time_constant
+
+   68 number: "integer literal"
+   69       | "floating-point literal"
+   70       | FLOATE_LITERAL
+   71       | FLOATQ_LITERAL
+   72       | LARGE_INTEGER_LITERAL
+   73       | "scaled decimal literal"
+
+   74 small_number: BYTE_LITERAL
+
+   75 symbol_constant: '#' symbol
+   76                | '#' "string literal"
+
+   77 symbol: "identifier"
+   78       | binary_selector
+   79       | "symbol literal"
+   80       | "keyword message"
+
+   81 character_constant: "character literal"
+
+   82 string: "string literal"
+
+   83 array_constant: '#' array
+   84               | '#' byte_array
+
+   85 array: '(' ')'
+   86      | '(' error '!'
+   87      | '(' error ')'
+   88      | '(' array_constant_list ')'
+
+   89 array_constant_list: array_constant_elt
+   90                    | array_constant_list array_constant_elt
+
+   91 array_constant_elt: array
+   92                   | byte_array
+   93                   | literal
+   94                   | symbol
+
+   95 byte_array: '[' ']'
+   96           | '[' error '!'
+   97           | '[' error ']'
+   98           | '[' byte_array_constant_list ']'
+
+   99 byte_array_constant_list: small_number
+  100                         | byte_array_constant_list small_number
+
+  101 variable_binding: '#' '{' error '!'
+  102                 | '#' '{' error '}'
+  103                 | '#' '{' variable_primary '}'
+
+  104 compile_time_constant: '#' '#' compile_time_constant_body
+
+  105 compile_time_constant_body: '(' error '!'
+  106                           | '(' error ')'
+  107                           | '(' temporaries statements ')'
+
+  108 array_constructor: '{' error '!'
+  109                  | '{' error '}'
+  110                  | '{' statements '}'
+
+  111 block: '[' error '!'
+  112      | '[' error ']'
+  113      | '[' opt_block_variables temporaries statements ']'
+
+  114 opt_block_variables: /* empty */
+  115                    | block_variable_list binary_selector
+
+  116 block_variable_list: ':' variable_name
+  117                    | block_variable_list ':' variable_name
+
+  118 message_expression: unary_expression
+  119                   | binary_expression
+  120                   | keyword_expression
+
+  121 unary_expression: unary_object_description unary_selector
+
+  122 unary_object_description: primary
+  123                         | unary_expression
+
+  124 binary_expression: binary_object_description binary_selector unary_object_description
+
+  125 binary_object_description: unary_object_description
+  126                          | binary_expression
+
+  127 keyword_expression: binary_object_description keyword_binary_object_description_list
+
+  128 keyword_binary_object_description_list: keyword binary_object_description
+  129                                       | keyword_binary_object_description_list keyword binary_object_description
+
+  130 cascaded_message_expression: message_expression semi_message_list
+
+  131 semi_message_list: ';' message_elt
+  132                  | semi_message_list ';' message_elt
+
+  133 message_elt: unary_selector
+  134            | binary_selector unary_object_description
+  135            | keyword_binary_object_description_list
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+'!' (33) 8 9 10 11 12 55 86 96 101 105 108 111
+'#' (35) 75 76 83 84 101 102 103 104
+'(' (40) 55 56 57 85 86 87 88 105 106 107
+')' (41) 56 57 85 87 88 106 107
+'.' (46) 36 38 39 41
+':' (58) 116 117
+';' (59) 131 132
+'[' (91) 95 96 97 98 111 112 113
+']' (93) 95 97 98 112 113
+'^' (94) 43
+'{' (123) 101 102 103 108 109 110
+'|' (124) 20 29 30
+'}' (125) 102 103 109 110
+error (256) 10 12 39 55 56 86 87 96 97 101 102 105 106 108 109 111
+    112
+"<primitive: ...>" (258) 26
+INTERNAL_TOKEN (259) 4
+"'.' or '::'" (260) 59
+"'_' or ':='" (261) 46 47
+"identifier" (262) 18 21 26 58 59 77
+"keyword message" (263) 24 80
+"string literal" (264) 76 82
+"symbol literal" (265) 79
+"binary message" (266) 19 27
+"integer literal" (267) 68
+BYTE_LITERAL (268) 74
+"floating-point literal" (269) 69
+FLOATE_LITERAL (270) 70
+FLOATQ_LITERAL (271) 71
+"character literal" (272) 81
+"scaled decimal literal" (273) 73
+LARGE_INTEGER_LITERAL (274) 72
+
+
+Nonterminals, with rules where they appear
+
+$accept (33)
+    on left: 0
+program (34)
+    on left: 1 2 3, on right: 0
+internal_marker (35)
+    on left: 4, on right: 1 8
+file_in (36)
+    on left: 5 6, on right: 2 6
+doit_and_method_list (37)
+    on left: 7 8, on right: 5 6
+doit (38)
+    on left: 9 10, on right: 7 8
+method_list (39)
+    on left: 11 12 13, on right: 8 11
+method (40)
+    on left: 14, on right: 1 11
+message_pattern (41)
+    on left: 15 16 17, on right: 14
+unary_selector (42)
+    on left: 18, on right: 15 121 133
+binary_selector (43)
+    on left: 19 20, on right: 16 78 115 124 134
+variable_name (44)
+    on left: 21, on right: 16 22 23 31 32 116 117
+keyword_variable_list (45)
+    on left: 22 23, on right: 17 23
+keyword (46)
+    on left: 24, on right: 22 23 128 129
+primitive (47)
+    on left: 25 26, on right: 14
+primitive_end (48)
+    on left: 27, on right: 26
+temporaries (49)
+    on left: 28 29 30, on right: 9 14 107 113
+variable_names (50)
+    on left: 31 32, on right: 30 32
+statements (51)
+    on left: 33 34 35 36, on right: 9 14 107 110 113
+statements.1 (52)
+    on left: 37 38 39, on right: 35 36 38 39
+optional_dot (53)
+    on left: 40 41, on right: 34 35 36
+statement (54)
+    on left: 42, on right: 37 38
+return_statement (55)
+    on left: 43, on right: 34 36
+expression (56)
+    on left: 44 45, on right: 42 43 57
+assigns (57)
+    on left: 46 47, on right: 45 47
+simple_expression (58)
+    on left: 48 49 50, on right: 44 45
+primary (59)
+    on left: 51 52 53 54 55 56 57, on right: 48 122
+variable_primary (60)
+    on left: 58 59, on right: 46 47 51 59 103
+literal (61)
+    on left: 60 61 62 63 64 65 66 67, on right: 52 93
+number (62)
+    on left: 68 69 70 71 72 73, on right: 60
+small_number (63)
+    on left: 74, on right: 61 99 100
+symbol_constant (64)
+    on left: 75 76, on right: 62
+symbol (65)
+    on left: 77 78 79 80, on right: 75 94
+character_constant (66)
+    on left: 81, on right: 63
+string (67)
+    on left: 82, on right: 64
+array_constant (68)
+    on left: 83 84, on right: 65
+array (69)
+    on left: 85 86 87 88, on right: 83 91
+array_constant_list (70)
+    on left: 89 90, on right: 88 90
+array_constant_elt (71)
+    on left: 91 92 93 94, on right: 89 90
+byte_array (72)
+    on left: 95 96 97 98, on right: 84 92
+byte_array_constant_list (73)
+    on left: 99 100, on right: 98 100
+variable_binding (74)
+    on left: 101 102 103, on right: 66
+compile_time_constant (75)
+    on left: 104, on right: 67
+compile_time_constant_body (76)
+    on left: 105 106 107, on right: 104
+array_constructor (77)
+    on left: 108 109 110, on right: 54
+block (78)
+    on left: 111 112 113, on right: 53
+opt_block_variables (79)
+    on left: 114 115, on right: 113
+block_variable_list (80)
+    on left: 116 117, on right: 115 117
+message_expression (81)
+    on left: 118 119 120, on right: 49 130
+unary_expression (82)
+    on left: 121, on right: 118 123
+unary_object_description (83)
+    on left: 122 123, on right: 121 124 125 134
+binary_expression (84)
+    on left: 124, on right: 119 126
+binary_object_description (85)
+    on left: 125 126, on right: 124 127 128 129
+keyword_expression (86)
+    on left: 127, on right: 120
+keyword_binary_object_description_list (87)
+    on left: 128 129, on right: 127 129 135
+cascaded_message_expression (88)
+    on left: 130, on right: 50
+semi_message_list (89)
+    on left: 131 132, on right: 130 132
+message_elt (90)
+    on left: 133 134 135, on right: 131 132
+
+
+state 0
+
+    0 $accept: . program $end
+
+    error           shift, and go to state 1
+    INTERNAL_TOKEN  shift, and go to state 2
+    '|'             shift, and go to state 3
+
+    $end                      reduce using rule 3 (program)
+    "identifier"              reduce using rule 28 (temporaries)
+    "string literal"          reduce using rule 28 (temporaries)
+    "integer literal"         reduce using rule 28 (temporaries)
+    BYTE_LITERAL              reduce using rule 28 (temporaries)
+    "floating-point literal"  reduce using rule 28 (temporaries)
+    FLOATE_LITERAL            reduce using rule 28 (temporaries)
+    FLOATQ_LITERAL            reduce using rule 28 (temporaries)
+    "character literal"       reduce using rule 28 (temporaries)
+    "scaled decimal literal"  reduce using rule 28 (temporaries)
+    LARGE_INTEGER_LITERAL     reduce using rule 28 (temporaries)
+    '!'                       reduce using rule 28 (temporaries)
+    '^'                       reduce using rule 28 (temporaries)
+    '('                       reduce using rule 28 (temporaries)
+    '#'                       reduce using rule 28 (temporaries)
+    '['                       reduce using rule 28 (temporaries)
+    '{'                       reduce using rule 28 (temporaries)
+
+    program               go to state 4
+    internal_marker       go to state 5
+    file_in               go to state 6
+    doit_and_method_list  go to state 7
+    doit                  go to state 8
+    temporaries           go to state 9
+
+
+state 1
+
+   10 doit: error . '!'
+
+    '!'  shift, and go to state 10
+
+
+state 2
+
+    4 internal_marker: INTERNAL_TOKEN .
+
+    $default  reduce using rule 4 (internal_marker)
+
+
+state 3
+
+   29 temporaries: '|' . '|'
+   30            | '|' . variable_names '|'
+
+    "identifier"  shift, and go to state 11
+    '|'           shift, and go to state 12
+
+    variable_name   go to state 13
+    variable_names  go to state 14
+
+
+state 4
+
+    0 $accept: program . $end
+
+    $end  shift, and go to state 15
+
+
+state 5
+
+    1 program: internal_marker . method
+
+    "identifier"       shift, and go to state 16
+    "keyword message"  shift, and go to state 17
+    "binary message"   shift, and go to state 18
+    '|'                shift, and go to state 19
+
+    method                 go to state 20
+    message_pattern        go to state 21
+    unary_selector         go to state 22
+    binary_selector        go to state 23
+    keyword_variable_list  go to state 24
+    keyword                go to state 25
+
+
+state 6
+
+    2 program: file_in .
+    6 file_in: file_in . doit_and_method_list
+
+    error  shift, and go to state 1
+    '|'    shift, and go to state 3
+
+    $end                      reduce using rule 2 (program)
+    "identifier"              reduce using rule 28 (temporaries)
+    "string literal"          reduce using rule 28 (temporaries)
+    "integer literal"         reduce using rule 28 (temporaries)
+    BYTE_LITERAL              reduce using rule 28 (temporaries)
+    "floating-point literal"  reduce using rule 28 (temporaries)
+    FLOATE_LITERAL            reduce using rule 28 (temporaries)
+    FLOATQ_LITERAL            reduce using rule 28 (temporaries)
+    "character literal"       reduce using rule 28 (temporaries)
+    "scaled decimal literal"  reduce using rule 28 (temporaries)
+    LARGE_INTEGER_LITERAL     reduce using rule 28 (temporaries)
+    '!'                       reduce using rule 28 (temporaries)
+    '^'                       reduce using rule 28 (temporaries)
+    '('                       reduce using rule 28 (temporaries)
+    '#'                       reduce using rule 28 (temporaries)
+    '['                       reduce using rule 28 (temporaries)
+    '{'                       reduce using rule 28 (temporaries)
+
+    doit_and_method_list  go to state 26
+    doit                  go to state 8
+    temporaries           go to state 9
+
+
+state 7
+
+    5 file_in: doit_and_method_list .
+
+    $default  reduce using rule 5 (file_in)
+
+
+state 8
+
+    7 doit_and_method_list: doit .
+    8                     | doit . internal_marker method_list '!'
+
+    INTERNAL_TOKEN  shift, and go to state 2
+
+    $default  reduce using rule 7 (doit_and_method_list)
+
+    internal_marker  go to state 27
+
+
+state 9
+
+    9 doit: temporaries . statements '!'
+
+    "identifier"              shift, and go to state 28
+    "string literal"          shift, and go to state 29
+    "integer literal"         shift, and go to state 30
+    BYTE_LITERAL              shift, and go to state 31
+    "floating-point literal"  shift, and go to state 32
+    FLOATE_LITERAL            shift, and go to state 33
+    FLOATQ_LITERAL            shift, and go to state 34
+    "character literal"       shift, and go to state 35
+    "scaled decimal literal"  shift, and go to state 36
+    LARGE_INTEGER_LITERAL     shift, and go to state 37
+    '^'                       shift, and go to state 38
+    '('                       shift, and go to state 39
+    '#'                       shift, and go to state 40
+    '['                       shift, and go to state 41
+    '{'                       shift, and go to state 42
+
+    $default  reduce using rule 33 (statements)
+
+    statements                   go to state 43
+    statements.1                 go to state 44
+    statement                    go to state 45
+    return_statement             go to state 46
+    expression                   go to state 47
+    assigns                      go to state 48
+    simple_expression            go to state 49
+    primary                      go to state 50
+    variable_primary             go to state 51
+    literal                      go to state 52
+    number                       go to state 53
+    small_number                 go to state 54
+    symbol_constant              go to state 55
+    character_constant           go to state 56
+    string                       go to state 57
+    array_constant               go to state 58
+    variable_binding             go to state 59
+    compile_time_constant        go to state 60
+    array_constructor            go to state 61
+    block                        go to state 62
+    message_expression           go to state 63
+    unary_expression             go to state 64
+    unary_object_description     go to state 65
+    binary_expression            go to state 66
+    binary_object_description    go to state 67
+    keyword_expression           go to state 68
+    cascaded_message_expression  go to state 69
+
+
+state 10
+
+   10 doit: error '!' .
+
+    $default  reduce using rule 10 (doit)
+
+
+state 11
+
+   21 variable_name: "identifier" .
+
+    $default  reduce using rule 21 (variable_name)
+
+
+state 12
+
+   29 temporaries: '|' '|' .
+
+    $default  reduce using rule 29 (temporaries)
+
+
+state 13
+
+   31 variable_names: variable_name .
+
+    $default  reduce using rule 31 (variable_names)
+
+
+state 14
+
+   30 temporaries: '|' variable_names . '|'
+   32 variable_names: variable_names . variable_name
+
+    "identifier"  shift, and go to state 11
+    '|'           shift, and go to state 70
+
+    variable_name  go to state 71
+
+
+state 15
+
+    0 $accept: program $end .
+
+    $default  accept
+
+
+state 16
+
+   18 unary_selector: "identifier" .
+
+    $default  reduce using rule 18 (unary_selector)
+
+
+state 17
+
+   24 keyword: "keyword message" .
+
+    $default  reduce using rule 24 (keyword)
+
+
+state 18
+
+   19 binary_selector: "binary message" .
+
+    $default  reduce using rule 19 (binary_selector)
+
+
+state 19
+
+   20 binary_selector: '|' .
+
+    $default  reduce using rule 20 (binary_selector)
+
+
+state 20
+
+    1 program: internal_marker method .
+
+    $default  reduce using rule 1 (program)
+
+
+state 21
+
+   14 method: message_pattern . temporaries primitive statements
+
+    '|'  shift, and go to state 3
+
+    $default  reduce using rule 28 (temporaries)
+
+    temporaries  go to state 72
+
+
+state 22
+
+   15 message_pattern: unary_selector .
+
+    $default  reduce using rule 15 (message_pattern)
+
+
+state 23
+
+   16 message_pattern: binary_selector . variable_name
+
+    "identifier"  shift, and go to state 11
+
+    variable_name  go to state 73
+
+
+state 24
+
+   17 message_pattern: keyword_variable_list .
+   23 keyword_variable_list: keyword_variable_list . keyword variable_name
+
+    "keyword message"  shift, and go to state 17
+
+    $default  reduce using rule 17 (message_pattern)
+
+    keyword  go to state 74
+
+
+state 25
+
+   22 keyword_variable_list: keyword . variable_name
+
+    "identifier"  shift, and go to state 11
+
+    variable_name  go to state 75
+
+
+state 26
+
+    6 file_in: file_in doit_and_method_list .
+
+    $default  reduce using rule 6 (file_in)
+
+
+state 27
+
+    8 doit_and_method_list: doit internal_marker . method_list '!'
+
+    error              shift, and go to state 76
+    "identifier"       shift, and go to state 16
+    "keyword message"  shift, and go to state 17
+    "binary message"   shift, and go to state 18
+    '|'                shift, and go to state 19
+
+    '!'  reduce using rule 13 (method_list)
+
+    method_list            go to state 77
+    method                 go to state 78
+    message_pattern        go to state 21
+    unary_selector         go to state 22
+    binary_selector        go to state 23
+    keyword_variable_list  go to state 24
+    keyword                go to state 25
+
+
+state 28
+
+   58 variable_primary: "identifier" .
+
+    $default  reduce using rule 58 (variable_primary)
+
+
+state 29
+
+   82 string: "string literal" .
+
+    $default  reduce using rule 82 (string)
+
+
+state 30
+
+   68 number: "integer literal" .
+
+    $default  reduce using rule 68 (number)
+
+
+state 31
+
+   74 small_number: BYTE_LITERAL .
+
+    $default  reduce using rule 74 (small_number)
+
+
+state 32
+
+   69 number: "floating-point literal" .
+
+    $default  reduce using rule 69 (number)
+
+
+state 33
+
+   70 number: FLOATE_LITERAL .
+
+    $default  reduce using rule 70 (number)
+
+
+state 34
+
+   71 number: FLOATQ_LITERAL .
+
+    $default  reduce using rule 71 (number)
+
+
+state 35
+
+   81 character_constant: "character literal" .
+
+    $default  reduce using rule 81 (character_constant)
+
+
+state 36
+
+   73 number: "scaled decimal literal" .
+
+    $default  reduce using rule 73 (number)
+
+
+state 37
+
+   72 number: LARGE_INTEGER_LITERAL .
+
+    $default  reduce using rule 72 (number)
+
+
+state 38
+
+   43 return_statement: '^' . expression
+
+    "identifier"              shift, and go to state 28
+    "string literal"          shift, and go to state 29
+    "integer literal"         shift, and go to state 30
+    BYTE_LITERAL              shift, and go to state 31
+    "floating-point literal"  shift, and go to state 32
+    FLOATE_LITERAL            shift, and go to state 33
+    FLOATQ_LITERAL            shift, and go to state 34
+    "character literal"       shift, and go to state 35
+    "scaled decimal literal"  shift, and go to state 36
+    LARGE_INTEGER_LITERAL     shift, and go to state 37
+    '('                       shift, and go to state 39
+    '#'                       shift, and go to state 40
+    '['                       shift, and go to state 41
+    '{'                       shift, and go to state 42
+
+    expression                   go to state 79
+    assigns                      go to state 48
+    simple_expression            go to state 49
+    primary                      go to state 50
+    variable_primary             go to state 51
+    literal                      go to state 52
+    number                       go to state 53
+    small_number                 go to state 54
+    symbol_constant              go to state 55
+    character_constant           go to state 56
+    string                       go to state 57
+    array_constant               go to state 58
+    variable_binding             go to state 59
+    compile_time_constant        go to state 60
+    array_constructor            go to state 61
+    block                        go to state 62
+    message_expression           go to state 63
+    unary_expression             go to state 64
+    unary_object_description     go to state 65
+    binary_expression            go to state 66
+    binary_object_description    go to state 67
+    keyword_expression           go to state 68
+    cascaded_message_expression  go to state 69
+
+
+state 39
+
+   55 primary: '(' . error '!'
+   56        | '(' . error ')'
+   57        | '(' . expression ')'
+
+    error                     shift, and go to state 80
+    "identifier"              shift, and go to state 28
+    "string literal"          shift, and go to state 29
+    "integer literal"         shift, and go to state 30
+    BYTE_LITERAL              shift, and go to state 31
+    "floating-point literal"  shift, and go to state 32
+    FLOATE_LITERAL            shift, and go to state 33
+    FLOATQ_LITERAL            shift, and go to state 34
+    "character literal"       shift, and go to state 35
+    "scaled decimal literal"  shift, and go to state 36
+    LARGE_INTEGER_LITERAL     shift, and go to state 37
+    '('                       shift, and go to state 39
+    '#'                       shift, and go to state 40
+    '['                       shift, and go to state 41
+    '{'                       shift, and go to state 42
+
+    expression                   go to state 81
+    assigns                      go to state 48
+    simple_expression            go to state 49
+    primary                      go to state 50
+    variable_primary             go to state 51
+    literal                      go to state 52
+    number                       go to state 53
+    small_number                 go to state 54
+    symbol_constant              go to state 55
+    character_constant           go to state 56
+    string                       go to state 57
+    array_constant               go to state 58
+    variable_binding             go to state 59
+    compile_time_constant        go to state 60
+    array_constructor            go to state 61
+    block                        go to state 62
+    message_expression           go to state 63
+    unary_expression             go to state 64
+    unary_object_description     go to state 65
+    binary_expression            go to state 66
+    binary_object_description    go to state 67
+    keyword_expression           go to state 68
+    cascaded_message_expression  go to state 69
+
+
+state 40
+
+   75 symbol_constant: '#' . symbol
+   76                | '#' . "string literal"
+   83 array_constant: '#' . array
+   84               | '#' . byte_array
+  101 variable_binding: '#' . '{' error '!'
+  102                 | '#' . '{' error '}'
+  103                 | '#' . '{' variable_primary '}'
+  104 compile_time_constant: '#' . '#' compile_time_constant_body
+
+    "identifier"       shift, and go to state 82
+    "keyword message"  shift, and go to state 83
+    "string literal"   shift, and go to state 84
+    "symbol literal"   shift, and go to state 85
+    "binary message"   shift, and go to state 18
+    '|'                shift, and go to state 19
+    '('                shift, and go to state 86
+    '#'                shift, and go to state 87
+    '['                shift, and go to state 88
+    '{'                shift, and go to state 89
+
+    binary_selector  go to state 90
+    symbol           go to state 91
+    array            go to state 92
+    byte_array       go to state 93
+
+
+state 41
+
+  111 block: '[' . error '!'
+  112      | '[' . error ']'
+  113      | '[' . opt_block_variables temporaries statements ']'
+
+    error  shift, and go to state 94
+    ':'    shift, and go to state 95
+
+    "identifier"              reduce using rule 114 (opt_block_variables)
+    "string literal"          reduce using rule 114 (opt_block_variables)
+    '|'                       reduce using rule 114 (opt_block_variables)
+    "integer literal"         reduce using rule 114 (opt_block_variables)
+    BYTE_LITERAL              reduce using rule 114 (opt_block_variables)
+    "floating-point literal"  reduce using rule 114 (opt_block_variables)
+    FLOATE_LITERAL            reduce using rule 114 (opt_block_variables)
+    FLOATQ_LITERAL            reduce using rule 114 (opt_block_variables)
+    "character literal"       reduce using rule 114 (opt_block_variables)
+    "scaled decimal literal"  reduce using rule 114 (opt_block_variables)
+    LARGE_INTEGER_LITERAL     reduce using rule 114 (opt_block_variables)
+    '^'                       reduce using rule 114 (opt_block_variables)
+    '('                       reduce using rule 114 (opt_block_variables)
+    '#'                       reduce using rule 114 (opt_block_variables)
+    '['                       reduce using rule 114 (opt_block_variables)
+    ']'                       reduce using rule 114 (opt_block_variables)
+    '{'                       reduce using rule 114 (opt_block_variables)
+
+    opt_block_variables  go to state 96
+    block_variable_list  go to state 97
+
+
+state 42
+
+  108 array_constructor: '{' . error '!'
+  109                  | '{' . error '}'
+  110                  | '{' . statements '}'
+
+    error                     shift, and go to state 98
+    "identifier"              shift, and go to state 28
+    "string literal"          shift, and go to state 29
+    "integer literal"         shift, and go to state 30
+    BYTE_LITERAL              shift, and go to state 31
+    "floating-point literal"  shift, and go to state 32
+    FLOATE_LITERAL            shift, and go to state 33
+    FLOATQ_LITERAL            shift, and go to state 34
+    "character literal"       shift, and go to state 35
+    "scaled decimal literal"  shift, and go to state 36
+    LARGE_INTEGER_LITERAL     shift, and go to state 37
+    '^'                       shift, and go to state 38
+    '('                       shift, and go to state 39
+    '#'                       shift, and go to state 40
+    '['                       shift, and go to state 41
+    '{'                       shift, and go to state 42
+
+    '}'  reduce using rule 33 (statements)
+
+    statements                   go to state 99
+    statements.1                 go to state 44
+    statement                    go to state 45
+    return_statement             go to state 46
+    expression                   go to state 47
+    assigns                      go to state 48
+    simple_expression            go to state 49
+    primary                      go to state 50
+    variable_primary             go to state 51
+    literal                      go to state 52
+    number                       go to state 53
+    small_number                 go to state 54
+    symbol_constant              go to state 55
+    character_constant           go to state 56
+    string                       go to state 57
+    array_constant               go to state 58
+    variable_binding             go to state 59
+    compile_time_constant        go to state 60
+    array_constructor            go to state 61
+    block                        go to state 62
+    message_expression           go to state 63
+    unary_expression             go to state 64
+    unary_object_description     go to state 65
+    binary_expression            go to state 66
+    binary_object_description    go to state 67
+    keyword_expression           go to state 68
+    cascaded_message_expression  go to state 69
+
+
+state 43
+
+    9 doit: temporaries statements . '!'
+
+    '!'  shift, and go to state 100
+
+
+state 44
+
+   35 statements: statements.1 . optional_dot
+   36           | statements.1 . '.' return_statement optional_dot
+   38 statements.1: statements.1 . '.' statement
+   39             | statements.1 . '.' error
+
+    '.'  shift, and go to state 101
+
+    $default  reduce using rule 40 (optional_dot)
+
+    optional_dot  go to state 102
+
+
+state 45
+
+   37 statements.1: statement .
+
+    $default  reduce using rule 37 (statements.1)
+
+
+state 46
+
+   34 statements: return_statement . optional_dot
+
+    '.'  shift, and go to state 103
+
+    $default  reduce using rule 40 (optional_dot)
+
+    optional_dot  go to state 104
+
+
+state 47
+
+   42 statement: expression .
+
+    $default  reduce using rule 42 (statement)
+
+
+state 48
+
+   45 expression: assigns . simple_expression
+   47 assigns: assigns . variable_primary "'_' or ':='"
+
+    "identifier"              shift, and go to state 28
+    "string literal"          shift, and go to state 29
+    "integer literal"         shift, and go to state 30
+    BYTE_LITERAL              shift, and go to state 31
+    "floating-point literal"  shift, and go to state 32
+    FLOATE_LITERAL            shift, and go to state 33
+    FLOATQ_LITERAL            shift, and go to state 34
+    "character literal"       shift, and go to state 35
+    "scaled decimal literal"  shift, and go to state 36
+    LARGE_INTEGER_LITERAL     shift, and go to state 37
+    '('                       shift, and go to state 39
+    '#'                       shift, and go to state 40
+    '['                       shift, and go to state 41
+    '{'                       shift, and go to state 42
+
+    simple_expression            go to state 105
+    primary                      go to state 50
+    variable_primary             go to state 106
+    literal                      go to state 52
+    number                       go to state 53
+    small_number                 go to state 54
+    symbol_constant              go to state 55
+    character_constant           go to state 56
+    string                       go to state 57
+    array_constant               go to state 58
+    variable_binding             go to state 59
+    compile_time_constant        go to state 60
+    array_constructor            go to state 61
+    block                        go to state 62
+    message_expression           go to state 63
+    unary_expression             go to state 64
+    unary_object_description     go to state 65
+    binary_expression            go to state 66
+    binary_object_description    go to state 67
+    keyword_expression           go to state 68
+    cascaded_message_expression  go to state 69
+
+
+state 49
+
+   44 expression: simple_expression .
+
+    $default  reduce using rule 44 (expression)
+
+
+state 50
+
+   48 simple_expression: primary .
+  122 unary_object_description: primary .
+
+    "identifier"       reduce using rule 122 (unary_object_description)
+    "keyword message"  reduce using rule 122 (unary_object_description)
+    "binary message"   reduce using rule 122 (unary_object_description)
+    '|'                reduce using rule 122 (unary_object_description)
+    $default           reduce using rule 48 (simple_expression)
+
+
+state 51
+
+   46 assigns: variable_primary . "'_' or ':='"
+   51 primary: variable_primary .
+   59 variable_primary: variable_primary . "'.' or '::'" "identifier"
+
+    "'.' or '::'"  shift, and go to state 107
+    "'_' or ':='"  shift, and go to state 108
+
+    $default  reduce using rule 51 (primary)
+
+
+state 52
+
+   52 primary: literal .
+
+    $default  reduce using rule 52 (primary)
+
+
+state 53
+
+   60 literal: number .
+
+    $default  reduce using rule 60 (literal)
+
+
+state 54
+
+   61 literal: small_number .
+
+    $default  reduce using rule 61 (literal)
+
+
+state 55
+
+   62 literal: symbol_constant .
+
+    $default  reduce using rule 62 (literal)
+
+
+state 56
+
+   63 literal: character_constant .
+
+    $default  reduce using rule 63 (literal)
+
+
+state 57
+
+   64 literal: string .
+
+    $default  reduce using rule 64 (literal)
+
+
+state 58
+
+   65 literal: array_constant .
+
+    $default  reduce using rule 65 (literal)
+
+
+state 59
+
+   66 literal: variable_binding .
+
+    $default  reduce using rule 66 (literal)
+
+
+state 60
+
+   67 literal: compile_time_constant .
+
+    $default  reduce using rule 67 (literal)
+
+
+state 61
+
+   54 primary: array_constructor .
+
+    $default  reduce using rule 54 (primary)
+
+
+state 62
+
+   53 primary: block .
+
+    $default  reduce using rule 53 (primary)
+
+
+state 63
+
+   49 simple_expression: message_expression .
+  130 cascaded_message_expression: message_expression . semi_message_list
+
+    ';'  shift, and go to state 109
+
+    $default  reduce using rule 49 (simple_expression)
+
+    semi_message_list  go to state 110
+
+
+state 64
+
+  118 message_expression: unary_expression .
+  123 unary_object_description: unary_expression .
+
+    "identifier"       reduce using rule 123 (unary_object_description)
+    "keyword message"  reduce using rule 123 (unary_object_description)
+    "binary message"   reduce using rule 123 (unary_object_description)
+    '|'                reduce using rule 123 (unary_object_description)
+    $default           reduce using rule 118 (message_expression)
+
+
+state 65
+
+  121 unary_expression: unary_object_description . unary_selector
+  125 binary_object_description: unary_object_description .
+
+    "identifier"  shift, and go to state 16
+
+    $default  reduce using rule 125 (binary_object_description)
+
+    unary_selector  go to state 111
+
+
+state 66
+
+  119 message_expression: binary_expression .
+  126 binary_object_description: binary_expression .
+
+    "keyword message"  reduce using rule 126 (binary_object_description)
+    "binary message"   reduce using rule 126 (binary_object_description)
+    '|'                reduce using rule 126 (binary_object_description)
+    $default           reduce using rule 119 (message_expression)
+
+
+state 67
+
+  124 binary_expression: binary_object_description . binary_selector unary_object_description
+  127 keyword_expression: binary_object_description . keyword_binary_object_description_list
+
+    "keyword message"  shift, and go to state 17
+    "binary message"   shift, and go to state 18
+    '|'                shift, and go to state 19
+
+    binary_selector                         go to state 112
+    keyword                                 go to state 113
+    keyword_binary_object_description_list  go to state 114
+
+
+state 68
+
+  120 message_expression: keyword_expression .
+
+    $default  reduce using rule 120 (message_expression)
+
+
+state 69
+
+   50 simple_expression: cascaded_message_expression .
+
+    $default  reduce using rule 50 (simple_expression)
+
+
+state 70
+
+   30 temporaries: '|' variable_names '|' .
+
+    $default  reduce using rule 30 (temporaries)
+
+
+state 71
+
+   32 variable_names: variable_names variable_name .
+
+    $default  reduce using rule 32 (variable_names)
+
+
+state 72
+
+   14 method: message_pattern temporaries . primitive statements
+
+    "<primitive: ...>"  shift, and go to state 115
+
+    $default  reduce using rule 25 (primitive)
+
+    primitive  go to state 116
+
+
+state 73
+
+   16 message_pattern: binary_selector variable_name .
+
+    $default  reduce using rule 16 (message_pattern)
+
+
+state 74
+
+   23 keyword_variable_list: keyword_variable_list keyword . variable_name
+
+    "identifier"  shift, and go to state 11
+
+    variable_name  go to state 117
+
+
+state 75
+
+   22 keyword_variable_list: keyword variable_name .
+
+    $default  reduce using rule 22 (keyword_variable_list)
+
+
+state 76
+
+   12 method_list: error . '!'
+
+    '!'  shift, and go to state 118
+
+
+state 77
+
+    8 doit_and_method_list: doit internal_marker method_list . '!'
+
+    '!'  shift, and go to state 119
+
+
+state 78
+
+   11 method_list: method . '!' method_list
+
+    '!'  shift, and go to state 120
+
+
+state 79
+
+   43 return_statement: '^' expression .
+
+    $default  reduce using rule 43 (return_statement)
+
+
+state 80
+
+   55 primary: '(' error . '!'
+   56        | '(' error . ')'
+
+    '!'  shift, and go to state 121
+    ')'  shift, and go to state 122
+
+
+state 81
+
+   57 primary: '(' expression . ')'
+
+    ')'  shift, and go to state 123
+
+
+state 82
+
+   77 symbol: "identifier" .
+
+    $default  reduce using rule 77 (symbol)
+
+
+state 83
+
+   80 symbol: "keyword message" .
+
+    $default  reduce using rule 80 (symbol)
+
+
+state 84
+
+   76 symbol_constant: '#' "string literal" .
+
+    $default  reduce using rule 76 (symbol_constant)
+
+
+state 85
+
+   79 symbol: "symbol literal" .
+
+    $default  reduce using rule 79 (symbol)
+
+
+state 86
+
+   85 array: '(' . ')'
+   86      | '(' . error '!'
+   87      | '(' . error ')'
+   88      | '(' . array_constant_list ')'
+
+    error                     shift, and go to state 124
+    "identifier"              shift, and go to state 82
+    "keyword message"         shift, and go to state 83
+    "string literal"          shift, and go to state 29
+    "symbol literal"          shift, and go to state 85
+    "binary message"          shift, and go to state 18
+    '|'                       shift, and go to state 19
+    "integer literal"         shift, and go to state 30
+    BYTE_LITERAL              shift, and go to state 31
+    "floating-point literal"  shift, and go to state 32
+    FLOATE_LITERAL            shift, and go to state 33
+    FLOATQ_LITERAL            shift, and go to state 34
+    "character literal"       shift, and go to state 35
+    "scaled decimal literal"  shift, and go to state 36
+    LARGE_INTEGER_LITERAL     shift, and go to state 37
+    '('                       shift, and go to state 86
+    ')'                       shift, and go to state 125
+    '#'                       shift, and go to state 40
+    '['                       shift, and go to state 88
+
+    binary_selector        go to state 90
+    literal                go to state 126
+    number                 go to state 53
+    small_number           go to state 54
+    symbol_constant        go to state 55
+    symbol                 go to state 127
+    character_constant     go to state 56
+    string                 go to state 57
+    array_constant         go to state 58
+    array                  go to state 128
+    array_constant_list    go to state 129
+    array_constant_elt     go to state 130
+    byte_array             go to state 131
+    variable_binding       go to state 59
+    compile_time_constant  go to state 60
+
+
+state 87
+
+  104 compile_time_constant: '#' '#' . compile_time_constant_body
+
+    '('  shift, and go to state 132
+
+    compile_time_constant_body  go to state 133
+
+
+state 88
+
+   95 byte_array: '[' . ']'
+   96           | '[' . error '!'
+   97           | '[' . error ']'
+   98           | '[' . byte_array_constant_list ']'
+
+    error         shift, and go to state 134
+    BYTE_LITERAL  shift, and go to state 31
+    ']'           shift, and go to state 135
+
+    small_number              go to state 136
+    byte_array_constant_list  go to state 137
+
+
+state 89
+
+  101 variable_binding: '#' '{' . error '!'
+  102                 | '#' '{' . error '}'
+  103                 | '#' '{' . variable_primary '}'
+
+    error         shift, and go to state 138
+    "identifier"  shift, and go to state 28
+
+    variable_primary  go to state 139
+
+
+state 90
+
+   78 symbol: binary_selector .
+
+    $default  reduce using rule 78 (symbol)
+
+
+state 91
+
+   75 symbol_constant: '#' symbol .
+
+    $default  reduce using rule 75 (symbol_constant)
+
+
+state 92
+
+   83 array_constant: '#' array .
+
+    $default  reduce using rule 83 (array_constant)
+
+
+state 93
+
+   84 array_constant: '#' byte_array .
+
+    $default  reduce using rule 84 (array_constant)
+
+
+state 94
+
+  111 block: '[' error . '!'
+  112      | '[' error . ']'
+
+    '!'  shift, and go to state 140
+    ']'  shift, and go to state 141
+
+
+state 95
+
+  116 block_variable_list: ':' . variable_name
+
+    "identifier"  shift, and go to state 11
+
+    variable_name  go to state 142
+
+
+state 96
+
+  113 block: '[' opt_block_variables . temporaries statements ']'
+
+    '|'  shift, and go to state 3
+
+    $default  reduce using rule 28 (temporaries)
+
+    temporaries  go to state 143
+
+
+state 97
+
+  115 opt_block_variables: block_variable_list . binary_selector
+  117 block_variable_list: block_variable_list . ':' variable_name
+
+    "binary message"  shift, and go to state 18
+    '|'               shift, and go to state 19
+    ':'               shift, and go to state 144
+
+    binary_selector  go to state 145
+
+
+state 98
+
+  108 array_constructor: '{' error . '!'
+  109                  | '{' error . '}'
+
+    '!'  shift, and go to state 146
+    '}'  shift, and go to state 147
+
+
+state 99
+
+  110 array_constructor: '{' statements . '}'
+
+    '}'  shift, and go to state 148
+
+
+state 100
+
+    9 doit: temporaries statements '!' .
+
+    $default  reduce using rule 9 (doit)
+
+
+state 101
+
+   36 statements: statements.1 '.' . return_statement optional_dot
+   38 statements.1: statements.1 '.' . statement
+   39             | statements.1 '.' . error
+   41 optional_dot: '.' .
+
+    error                     shift, and go to state 149
+    "identifier"              shift, and go to state 28
+    "string literal"          shift, and go to state 29
+    "integer literal"         shift, and go to state 30
+    BYTE_LITERAL              shift, and go to state 31
+    "floating-point literal"  shift, and go to state 32
+    FLOATE_LITERAL            shift, and go to state 33
+    FLOATQ_LITERAL            shift, and go to state 34
+    "character literal"       shift, and go to state 35
+    "scaled decimal literal"  shift, and go to state 36
+    LARGE_INTEGER_LITERAL     shift, and go to state 37
+    '^'                       shift, and go to state 38
+    '('                       shift, and go to state 39
+    '#'                       shift, and go to state 40
+    '['                       shift, and go to state 41
+    '{'                       shift, and go to state 42
+
+    $end  reduce using rule 41 (optional_dot)
+    '!'   reduce using rule 41 (optional_dot)
+    ')'   reduce using rule 41 (optional_dot)
+    ']'   reduce using rule 41 (optional_dot)
+    '}'   reduce using rule 41 (optional_dot)
+
+    statement                    go to state 150
+    return_statement             go to state 151
+    expression                   go to state 47
+    assigns                      go to state 48
+    simple_expression            go to state 49
+    primary                      go to state 50
+    variable_primary             go to state 51
+    literal                      go to state 52
+    number                       go to state 53
+    small_number                 go to state 54
+    symbol_constant              go to state 55
+    character_constant           go to state 56
+    string                       go to state 57
+    array_constant               go to state 58
+    variable_binding             go to state 59
+    compile_time_constant        go to state 60
+    array_constructor            go to state 61
+    block                        go to state 62
+    message_expression           go to state 63
+    unary_expression             go to state 64
+    unary_object_description     go to state 65
+    binary_expression            go to state 66
+    binary_object_description    go to state 67
+    keyword_expression           go to state 68
+    cascaded_message_expression  go to state 69
+
+
+state 102
+
+   35 statements: statements.1 optional_dot .
+
+    $default  reduce using rule 35 (statements)
+
+
+state 103
+
+   41 optional_dot: '.' .
+
+    $default  reduce using rule 41 (optional_dot)
+
+
+state 104
+
+   34 statements: return_statement optional_dot .
+
+    $default  reduce using rule 34 (statements)
+
+
+state 105
+
+   45 expression: assigns simple_expression .
+
+    $default  reduce using rule 45 (expression)
+
+
+state 106
+
+   47 assigns: assigns variable_primary . "'_' or ':='"
+   51 primary: variable_primary .
+   59 variable_primary: variable_primary . "'.' or '::'" "identifier"
+
+    "'.' or '::'"  shift, and go to state 107
+    "'_' or ':='"  shift, and go to state 152
+
+    $default  reduce using rule 51 (primary)
+
+
+state 107
+
+   59 variable_primary: variable_primary "'.' or '::'" . "identifier"
+
+    "identifier"  shift, and go to state 153
+
+
+state 108
+
+   46 assigns: variable_primary "'_' or ':='" .
+
+    $default  reduce using rule 46 (assigns)
+
+
+state 109
+
+  131 semi_message_list: ';' . message_elt
+
+    "identifier"       shift, and go to state 16
+    "keyword message"  shift, and go to state 17
+    "binary message"   shift, and go to state 18
+    '|'                shift, and go to state 19
+
+    unary_selector                          go to state 154
+    binary_selector                         go to state 155
+    keyword                                 go to state 113
+    keyword_binary_object_description_list  go to state 156
+    message_elt                             go to state 157
+
+
+state 110
+
+  130 cascaded_message_expression: message_expression semi_message_list .
+  132 semi_message_list: semi_message_list . ';' message_elt
+
+    ';'  shift, and go to state 158
+
+    $default  reduce using rule 130 (cascaded_message_expression)
+
+
+state 111
+
+  121 unary_expression: unary_object_description unary_selector .
+
+    $default  reduce using rule 121 (unary_expression)
+
+
+state 112
+
+  124 binary_expression: binary_object_description binary_selector . unary_object_description
+
+    "identifier"              shift, and go to state 28
+    "string literal"          shift, and go to state 29
+    "integer literal"         shift, and go to state 30
+    BYTE_LITERAL              shift, and go to state 31
+    "floating-point literal"  shift, and go to state 32
+    FLOATE_LITERAL            shift, and go to state 33
+    FLOATQ_LITERAL            shift, and go to state 34
+    "character literal"       shift, and go to state 35
+    "scaled decimal literal"  shift, and go to state 36
+    LARGE_INTEGER_LITERAL     shift, and go to state 37
+    '('                       shift, and go to state 39
+    '#'                       shift, and go to state 40
+    '['                       shift, and go to state 41
+    '{'                       shift, and go to state 42
+
+    primary                   go to state 159
+    variable_primary          go to state 160
+    literal                   go to state 52
+    number                    go to state 53
+    small_number              go to state 54
+    symbol_constant           go to state 55
+    character_constant        go to state 56
+    string                    go to state 57
+    array_constant            go to state 58
+    variable_binding          go to state 59
+    compile_time_constant     go to state 60
+    array_constructor         go to state 61
+    block                     go to state 62
+    unary_expression          go to state 161
+    unary_object_description  go to state 162
+
+
+state 113
+
+  128 keyword_binary_object_description_list: keyword . binary_object_description
+
+    "identifier"              shift, and go to state 28
+    "string literal"          shift, and go to state 29
+    "integer literal"         shift, and go to state 30
+    BYTE_LITERAL              shift, and go to state 31
+    "floating-point literal"  shift, and go to state 32
+    FLOATE_LITERAL            shift, and go to state 33
+    FLOATQ_LITERAL            shift, and go to state 34
+    "character literal"       shift, and go to state 35
+    "scaled decimal literal"  shift, and go to state 36
+    LARGE_INTEGER_LITERAL     shift, and go to state 37
+    '('                       shift, and go to state 39
+    '#'                       shift, and go to state 40
+    '['                       shift, and go to state 41
+    '{'                       shift, and go to state 42
+
+    primary                    go to state 159
+    variable_primary           go to state 160
+    literal                    go to state 52
+    number                     go to state 53
+    small_number               go to state 54
+    symbol_constant            go to state 55
+    character_constant         go to state 56
+    string                     go to state 57
+    array_constant             go to state 58
+    variable_binding           go to state 59
+    compile_time_constant      go to state 60
+    array_constructor          go to state 61
+    block                      go to state 62
+    unary_expression           go to state 161
+    unary_object_description   go to state 65
+    binary_expression          go to state 163
+    binary_object_description  go to state 164
+
+
+state 114
+
+  127 keyword_expression: binary_object_description keyword_binary_object_description_list .
+  129 keyword_binary_object_description_list: keyword_binary_object_description_list . keyword binary_object_description
+
+    "keyword message"  shift, and go to state 17
+
+    $default  reduce using rule 127 (keyword_expression)
+
+    keyword  go to state 165
+
+
+state 115
+
+   26 primitive: "<primitive: ...>" . "identifier" primitive_end
+
+    "identifier"  shift, and go to state 166
+
+
+state 116
+
+   14 method: message_pattern temporaries primitive . statements
+
+    "identifier"              shift, and go to state 28
+    "string literal"          shift, and go to state 29
+    "integer literal"         shift, and go to state 30
+    BYTE_LITERAL              shift, and go to state 31
+    "floating-point literal"  shift, and go to state 32
+    FLOATE_LITERAL            shift, and go to state 33
+    FLOATQ_LITERAL            shift, and go to state 34
+    "character literal"       shift, and go to state 35
+    "scaled decimal literal"  shift, and go to state 36
+    LARGE_INTEGER_LITERAL     shift, and go to state 37
+    '^'                       shift, and go to state 38
+    '('                       shift, and go to state 39
+    '#'                       shift, and go to state 40
+    '['                       shift, and go to state 41
+    '{'                       shift, and go to state 42
+
+    $default  reduce using rule 33 (statements)
+
+    statements                   go to state 167
+    statements.1                 go to state 44
+    statement                    go to state 45
+    return_statement             go to state 46
+    expression                   go to state 47
+    assigns                      go to state 48
+    simple_expression            go to state 49
+    primary                      go to state 50
+    variable_primary             go to state 51
+    literal                      go to state 52
+    number                       go to state 53
+    small_number                 go to state 54
+    symbol_constant              go to state 55
+    character_constant           go to state 56
+    string                       go to state 57
+    array_constant               go to state 58
+    variable_binding             go to state 59
+    compile_time_constant        go to state 60
+    array_constructor            go to state 61
+    block                        go to state 62
+    message_expression           go to state 63
+    unary_expression             go to state 64
+    unary_object_description     go to state 65
+    binary_expression            go to state 66
+    binary_object_description    go to state 67
+    keyword_expression           go to state 68
+    cascaded_message_expression  go to state 69
+
+
+state 117
+
+   23 keyword_variable_list: keyword_variable_list keyword variable_name .
+
+    $default  reduce using rule 23 (keyword_variable_list)
+
+
+state 118
+
+   12 method_list: error '!' .
+
+    $default  reduce using rule 12 (method_list)
+
+
+state 119
+
+    8 doit_and_method_list: doit internal_marker method_list '!' .
+
+    $default  reduce using rule 8 (doit_and_method_list)
+
+
+state 120
+
+   11 method_list: method '!' . method_list
+
+    error              shift, and go to state 76
+    "identifier"       shift, and go to state 16
+    "keyword message"  shift, and go to state 17
+    "binary message"   shift, and go to state 18
+    '|'                shift, and go to state 19
+
+    '!'  reduce using rule 13 (method_list)
+
+    method_list            go to state 168
+    method                 go to state 78
+    message_pattern        go to state 21
+    unary_selector         go to state 22
+    binary_selector        go to state 23
+    keyword_variable_list  go to state 24
+    keyword                go to state 25
+
+
+state 121
+
+   55 primary: '(' error '!' .
+
+    $default  reduce using rule 55 (primary)
+
+
+state 122
+
+   56 primary: '(' error ')' .
+
+    $default  reduce using rule 56 (primary)
+
+
+state 123
+
+   57 primary: '(' expression ')' .
+
+    $default  reduce using rule 57 (primary)
+
+
+state 124
+
+   86 array: '(' error . '!'
+   87      | '(' error . ')'
+
+    '!'  shift, and go to state 169
+    ')'  shift, and go to state 170
+
+
+state 125
+
+   85 array: '(' ')' .
+
+    $default  reduce using rule 85 (array)
+
+
+state 126
+
+   93 array_constant_elt: literal .
+
+    $default  reduce using rule 93 (array_constant_elt)
+
+
+state 127
+
+   94 array_constant_elt: symbol .
+
+    $default  reduce using rule 94 (array_constant_elt)
+
+
+state 128
+
+   91 array_constant_elt: array .
+
+    $default  reduce using rule 91 (array_constant_elt)
+
+
+state 129
+
+   88 array: '(' array_constant_list . ')'
+   90 array_constant_list: array_constant_list . array_constant_elt
+
+    "identifier"              shift, and go to state 82
+    "keyword message"         shift, and go to state 83
+    "string literal"          shift, and go to state 29
+    "symbol literal"          shift, and go to state 85
+    "binary message"          shift, and go to state 18
+    '|'                       shift, and go to state 19
+    "integer literal"         shift, and go to state 30
+    BYTE_LITERAL              shift, and go to state 31
+    "floating-point literal"  shift, and go to state 32
+    FLOATE_LITERAL            shift, and go to state 33
+    FLOATQ_LITERAL            shift, and go to state 34
+    "character literal"       shift, and go to state 35
+    "scaled decimal literal"  shift, and go to state 36
+    LARGE_INTEGER_LITERAL     shift, and go to state 37
+    '('                       shift, and go to state 86
+    ')'                       shift, and go to state 171
+    '#'                       shift, and go to state 40
+    '['                       shift, and go to state 88
+
+    binary_selector        go to state 90
+    literal                go to state 126
+    number                 go to state 53
+    small_number           go to state 54
+    symbol_constant        go to state 55
+    symbol                 go to state 127
+    character_constant     go to state 56
+    string                 go to state 57
+    array_constant         go to state 58
+    array                  go to state 128
+    array_constant_elt     go to state 172
+    byte_array             go to state 131
+    variable_binding       go to state 59
+    compile_time_constant  go to state 60
+
+
+state 130
+
+   89 array_constant_list: array_constant_elt .
+
+    $default  reduce using rule 89 (array_constant_list)
+
+
+state 131
+
+   92 array_constant_elt: byte_array .
+
+    $default  reduce using rule 92 (array_constant_elt)
+
+
+state 132
+
+  105 compile_time_constant_body: '(' . error '!'
+  106                           | '(' . error ')'
+  107                           | '(' . temporaries statements ')'
+
+    error  shift, and go to state 173
+    '|'    shift, and go to state 3
+
+    "identifier"              reduce using rule 28 (temporaries)
+    "string literal"          reduce using rule 28 (temporaries)
+    "integer literal"         reduce using rule 28 (temporaries)
+    BYTE_LITERAL              reduce using rule 28 (temporaries)
+    "floating-point literal"  reduce using rule 28 (temporaries)
+    FLOATE_LITERAL            reduce using rule 28 (temporaries)
+    FLOATQ_LITERAL            reduce using rule 28 (temporaries)
+    "character literal"       reduce using rule 28 (temporaries)
+    "scaled decimal literal"  reduce using rule 28 (temporaries)
+    LARGE_INTEGER_LITERAL     reduce using rule 28 (temporaries)
+    '^'                       reduce using rule 28 (temporaries)
+    '('                       reduce using rule 28 (temporaries)
+    ')'                       reduce using rule 28 (temporaries)
+    '#'                       reduce using rule 28 (temporaries)
+    '['                       reduce using rule 28 (temporaries)
+    '{'                       reduce using rule 28 (temporaries)
+
+    temporaries  go to state 174
+
+
+state 133
+
+  104 compile_time_constant: '#' '#' compile_time_constant_body .
+
+    $default  reduce using rule 104 (compile_time_constant)
+
+
+state 134
+
+   96 byte_array: '[' error . '!'
+   97           | '[' error . ']'
+
+    '!'  shift, and go to state 175
+    ']'  shift, and go to state 176
+
+
+state 135
+
+   95 byte_array: '[' ']' .
+
+    $default  reduce using rule 95 (byte_array)
+
+
+state 136
+
+   99 byte_array_constant_list: small_number .
+
+    $default  reduce using rule 99 (byte_array_constant_list)
+
+
+state 137
+
+   98 byte_array: '[' byte_array_constant_list . ']'
+  100 byte_array_constant_list: byte_array_constant_list . small_number
+
+    BYTE_LITERAL  shift, and go to state 31
+    ']'           shift, and go to state 177
+
+    small_number  go to state 178
+
+
+state 138
+
+  101 variable_binding: '#' '{' error . '!'
+  102                 | '#' '{' error . '}'
+
+    '!'  shift, and go to state 179
+    '}'  shift, and go to state 180
+
+
+state 139
+
+   59 variable_primary: variable_primary . "'.' or '::'" "identifier"
+  103 variable_binding: '#' '{' variable_primary . '}'
+
+    "'.' or '::'"  shift, and go to state 107
+    '}'            shift, and go to state 181
+
+
+state 140
+
+  111 block: '[' error '!' .
+
+    $default  reduce using rule 111 (block)
+
+
+state 141
+
+  112 block: '[' error ']' .
+
+    $default  reduce using rule 112 (block)
+
+
+state 142
+
+  116 block_variable_list: ':' variable_name .
+
+    $default  reduce using rule 116 (block_variable_list)
+
+
+state 143
+
+  113 block: '[' opt_block_variables temporaries . statements ']'
+
+    "identifier"              shift, and go to state 28
+    "string literal"          shift, and go to state 29
+    "integer literal"         shift, and go to state 30
+    BYTE_LITERAL              shift, and go to state 31
+    "floating-point literal"  shift, and go to state 32
+    FLOATE_LITERAL            shift, and go to state 33
+    FLOATQ_LITERAL            shift, and go to state 34
+    "character literal"       shift, and go to state 35
+    "scaled decimal literal"  shift, and go to state 36
+    LARGE_INTEGER_LITERAL     shift, and go to state 37
+    '^'                       shift, and go to state 38
+    '('                       shift, and go to state 39
+    '#'                       shift, and go to state 40
+    '['                       shift, and go to state 41
+    '{'                       shift, and go to state 42
+
+    $default  reduce using rule 33 (statements)
+
+    statements                   go to state 182
+    statements.1                 go to state 44
+    statement                    go to state 45
+    return_statement             go to state 46
+    expression                   go to state 47
+    assigns                      go to state 48
+    simple_expression            go to state 49
+    primary                      go to state 50
+    variable_primary             go to state 51
+    literal                      go to state 52
+    number                       go to state 53
+    small_number                 go to state 54
+    symbol_constant              go to state 55
+    character_constant           go to state 56
+    string                       go to state 57
+    array_constant               go to state 58
+    variable_binding             go to state 59
+    compile_time_constant        go to state 60
+    array_constructor            go to state 61
+    block                        go to state 62
+    message_expression           go to state 63
+    unary_expression             go to state 64
+    unary_object_description     go to state 65
+    binary_expression            go to state 66
+    binary_object_description    go to state 67
+    keyword_expression           go to state 68
+    cascaded_message_expression  go to state 69
+
+
+state 144
+
+  117 block_variable_list: block_variable_list ':' . variable_name
+
+    "identifier"  shift, and go to state 11
+
+    variable_name  go to state 183
+
+
+state 145
+
+  115 opt_block_variables: block_variable_list binary_selector .
+
+    $default  reduce using rule 115 (opt_block_variables)
+
+
+state 146
+
+  108 array_constructor: '{' error '!' .
+
+    $default  reduce using rule 108 (array_constructor)
+
+
+state 147
+
+  109 array_constructor: '{' error '}' .
+
+    $default  reduce using rule 109 (array_constructor)
+
+
+state 148
+
+  110 array_constructor: '{' statements '}' .
+
+    $default  reduce using rule 110 (array_constructor)
+
+
+state 149
+
+   39 statements.1: statements.1 '.' error .
+
+    $default  reduce using rule 39 (statements.1)
+
+
+state 150
+
+   38 statements.1: statements.1 '.' statement .
+
+    $default  reduce using rule 38 (statements.1)
+
+
+state 151
+
+   36 statements: statements.1 '.' return_statement . optional_dot
+
+    '.'  shift, and go to state 103
+
+    $default  reduce using rule 40 (optional_dot)
+
+    optional_dot  go to state 184
+
+
+state 152
+
+   47 assigns: assigns variable_primary "'_' or ':='" .
+
+    $default  reduce using rule 47 (assigns)
+
+
+state 153
+
+   59 variable_primary: variable_primary "'.' or '::'" "identifier" .
+
+    $default  reduce using rule 59 (variable_primary)
+
+
+state 154
+
+  133 message_elt: unary_selector .
+
+    $default  reduce using rule 133 (message_elt)
+
+
+state 155
+
+  134 message_elt: binary_selector . unary_object_description
+
+    "identifier"              shift, and go to state 28
+    "string literal"          shift, and go to state 29
+    "integer literal"         shift, and go to state 30
+    BYTE_LITERAL              shift, and go to state 31
+    "floating-point literal"  shift, and go to state 32
+    FLOATE_LITERAL            shift, and go to state 33
+    FLOATQ_LITERAL            shift, and go to state 34
+    "character literal"       shift, and go to state 35
+    "scaled decimal literal"  shift, and go to state 36
+    LARGE_INTEGER_LITERAL     shift, and go to state 37
+    '('                       shift, and go to state 39
+    '#'                       shift, and go to state 40
+    '['                       shift, and go to state 41
+    '{'                       shift, and go to state 42
+
+    primary                   go to state 159
+    variable_primary          go to state 160
+    literal                   go to state 52
+    number                    go to state 53
+    small_number              go to state 54
+    symbol_constant           go to state 55
+    character_constant        go to state 56
+    string                    go to state 57
+    array_constant            go to state 58
+    variable_binding          go to state 59
+    compile_time_constant     go to state 60
+    array_constructor         go to state 61
+    block                     go to state 62
+    unary_expression          go to state 161
+    unary_object_description  go to state 185
+
+
+state 156
+
+  129 keyword_binary_object_description_list: keyword_binary_object_description_list . keyword binary_object_description
+  135 message_elt: keyword_binary_object_description_list .
+
+    "keyword message"  shift, and go to state 17
+
+    $default  reduce using rule 135 (message_elt)
+
+    keyword  go to state 165
+
+
+state 157
+
+  131 semi_message_list: ';' message_elt .
+
+    $default  reduce using rule 131 (semi_message_list)
+
+
+state 158
+
+  132 semi_message_list: semi_message_list ';' . message_elt
+
+    "identifier"       shift, and go to state 16
+    "keyword message"  shift, and go to state 17
+    "binary message"   shift, and go to state 18
+    '|'                shift, and go to state 19
+
+    unary_selector                          go to state 154
+    binary_selector                         go to state 155
+    keyword                                 go to state 113
+    keyword_binary_object_description_list  go to state 156
+    message_elt                             go to state 186
+
+
+state 159
+
+  122 unary_object_description: primary .
+
+    $default  reduce using rule 122 (unary_object_description)
+
+
+state 160
+
+   51 primary: variable_primary .
+   59 variable_primary: variable_primary . "'.' or '::'" "identifier"
+
+    "'.' or '::'"  shift, and go to state 107
+
+    $default  reduce using rule 51 (primary)
+
+
+state 161
+
+  123 unary_object_description: unary_expression .
+
+    $default  reduce using rule 123 (unary_object_description)
+
+
+state 162
+
+  121 unary_expression: unary_object_description . unary_selector
+  124 binary_expression: binary_object_description binary_selector unary_object_description .
+
+    "identifier"  shift, and go to state 16
+
+    $default  reduce using rule 124 (binary_expression)
+
+    unary_selector  go to state 111
+
+
+state 163
+
+  126 binary_object_description: binary_expression .
+
+    $default  reduce using rule 126 (binary_object_description)
+
+
+state 164
+
+  124 binary_expression: binary_object_description . binary_selector unary_object_description
+  128 keyword_binary_object_description_list: keyword binary_object_description .
+
+    "binary message"  shift, and go to state 18
+    '|'               shift, and go to state 19
+
+    $default  reduce using rule 128 (keyword_binary_object_description_list)
+
+    binary_selector  go to state 112
+
+
+state 165
+
+  129 keyword_binary_object_description_list: keyword_binary_object_description_list keyword . binary_object_description
+
+    "identifier"              shift, and go to state 28
+    "string literal"          shift, and go to state 29
+    "integer literal"         shift, and go to state 30
+    BYTE_LITERAL              shift, and go to state 31
+    "floating-point literal"  shift, and go to state 32
+    FLOATE_LITERAL            shift, and go to state 33
+    FLOATQ_LITERAL            shift, and go to state 34
+    "character literal"       shift, and go to state 35
+    "scaled decimal literal"  shift, and go to state 36
+    LARGE_INTEGER_LITERAL     shift, and go to state 37
+    '('                       shift, and go to state 39
+    '#'                       shift, and go to state 40
+    '['                       shift, and go to state 41
+    '{'                       shift, and go to state 42
+
+    primary                    go to state 159
+    variable_primary           go to state 160
+    literal                    go to state 52
+    number                     go to state 53
+    small_number               go to state 54
+    symbol_constant            go to state 55
+    character_constant         go to state 56
+    string                     go to state 57
+    array_constant             go to state 58
+    variable_binding           go to state 59
+    compile_time_constant      go to state 60
+    array_constructor          go to state 61
+    block                      go to state 62
+    unary_expression           go to state 161
+    unary_object_description   go to state 65
+    binary_expression          go to state 163
+    binary_object_description  go to state 187
+
+
+state 166
+
+   26 primitive: "<primitive: ...>" "identifier" . primitive_end
+
+    "binary message"  shift, and go to state 188
+
+    primitive_end  go to state 189
+
+
+state 167
+
+   14 method: message_pattern temporaries primitive statements .
+
+    $default  reduce using rule 14 (method)
+
+
+state 168
+
+   11 method_list: method '!' method_list .
+
+    $default  reduce using rule 11 (method_list)
+
+
+state 169
+
+   86 array: '(' error '!' .
+
+    $default  reduce using rule 86 (array)
+
+
+state 170
+
+   87 array: '(' error ')' .
+
+    $default  reduce using rule 87 (array)
+
+
+state 171
+
+   88 array: '(' array_constant_list ')' .
+
+    $default  reduce using rule 88 (array)
+
+
+state 172
+
+   90 array_constant_list: array_constant_list array_constant_elt .
+
+    $default  reduce using rule 90 (array_constant_list)
+
+
+state 173
+
+  105 compile_time_constant_body: '(' error . '!'
+  106                           | '(' error . ')'
+
+    '!'  shift, and go to state 190
+    ')'  shift, and go to state 191
+
+
+state 174
+
+  107 compile_time_constant_body: '(' temporaries . statements ')'
+
+    "identifier"              shift, and go to state 28
+    "string literal"          shift, and go to state 29
+    "integer literal"         shift, and go to state 30
+    BYTE_LITERAL              shift, and go to state 31
+    "floating-point literal"  shift, and go to state 32
+    FLOATE_LITERAL            shift, and go to state 33
+    FLOATQ_LITERAL            shift, and go to state 34
+    "character literal"       shift, and go to state 35
+    "scaled decimal literal"  shift, and go to state 36
+    LARGE_INTEGER_LITERAL     shift, and go to state 37
+    '^'                       shift, and go to state 38
+    '('                       shift, and go to state 39
+    '#'                       shift, and go to state 40
+    '['                       shift, and go to state 41
+    '{'                       shift, and go to state 42
+
+    $default  reduce using rule 33 (statements)
+
+    statements                   go to state 192
+    statements.1                 go to state 44
+    statement                    go to state 45
+    return_statement             go to state 46
+    expression                   go to state 47
+    assigns                      go to state 48
+    simple_expression            go to state 49
+    primary                      go to state 50
+    variable_primary             go to state 51
+    literal                      go to state 52
+    number                       go to state 53
+    small_number                 go to state 54
+    symbol_constant              go to state 55
+    character_constant           go to state 56
+    string                       go to state 57
+    array_constant               go to state 58
+    variable_binding             go to state 59
+    compile_time_constant        go to state 60
+    array_constructor            go to state 61
+    block                        go to state 62
+    message_expression           go to state 63
+    unary_expression             go to state 64
+    unary_object_description     go to state 65
+    binary_expression            go to state 66
+    binary_object_description    go to state 67
+    keyword_expression           go to state 68
+    cascaded_message_expression  go to state 69
+
+
+state 175
+
+   96 byte_array: '[' error '!' .
+
+    $default  reduce using rule 96 (byte_array)
+
+
+state 176
+
+   97 byte_array: '[' error ']' .
+
+    $default  reduce using rule 97 (byte_array)
+
+
+state 177
+
+   98 byte_array: '[' byte_array_constant_list ']' .
+
+    $default  reduce using rule 98 (byte_array)
+
+
+state 178
+
+  100 byte_array_constant_list: byte_array_constant_list small_number .
+
+    $default  reduce using rule 100 (byte_array_constant_list)
+
+
+state 179
+
+  101 variable_binding: '#' '{' error '!' .
+
+    $default  reduce using rule 101 (variable_binding)
+
+
+state 180
+
+  102 variable_binding: '#' '{' error '}' .
+
+    $default  reduce using rule 102 (variable_binding)
+
+
+state 181
+
+  103 variable_binding: '#' '{' variable_primary '}' .
+
+    $default  reduce using rule 103 (variable_binding)
+
+
+state 182
+
+  113 block: '[' opt_block_variables temporaries statements . ']'
+
+    ']'  shift, and go to state 193
+
+
+state 183
+
+  117 block_variable_list: block_variable_list ':' variable_name .
+
+    $default  reduce using rule 117 (block_variable_list)
+
+
+state 184
+
+   36 statements: statements.1 '.' return_statement optional_dot .
+
+    $default  reduce using rule 36 (statements)
+
+
+state 185
+
+  121 unary_expression: unary_object_description . unary_selector
+  134 message_elt: binary_selector unary_object_description .
+
+    "identifier"  shift, and go to state 16
+
+    $default  reduce using rule 134 (message_elt)
+
+    unary_selector  go to state 111
+
+
+state 186
+
+  132 semi_message_list: semi_message_list ';' message_elt .
+
+    $default  reduce using rule 132 (semi_message_list)
+
+
+state 187
+
+  124 binary_expression: binary_object_description . binary_selector unary_object_description
+  129 keyword_binary_object_description_list: keyword_binary_object_description_list keyword binary_object_description .
+
+    "binary message"  shift, and go to state 18
+    '|'               shift, and go to state 19
+
+    $default  reduce using rule 129 (keyword_binary_object_description_list)
+
+    binary_selector  go to state 112
+
+
+state 188
+
+   27 primitive_end: "binary message" .
+
+    $default  reduce using rule 27 (primitive_end)
+
+
+state 189
+
+   26 primitive: "<primitive: ...>" "identifier" primitive_end .
+
+    $default  reduce using rule 26 (primitive)
+
+
+state 190
+
+  105 compile_time_constant_body: '(' error '!' .
+
+    $default  reduce using rule 105 (compile_time_constant_body)
+
+
+state 191
+
+  106 compile_time_constant_body: '(' error ')' .
+
+    $default  reduce using rule 106 (compile_time_constant_body)
+
+
+state 192
+
+  107 compile_time_constant_body: '(' temporaries statements . ')'
+
+    ')'  shift, and go to state 194
+
+
+state 193
+
+  113 block: '[' opt_block_variables temporaries statements ']' .
+
+    $default  reduce using rule 113 (block)
+
+
+state 194
+
+  107 compile_time_constant_body: '(' temporaries statements ')' .
+
+    $default  reduce using rule 107 (compile_time_constant_body)
