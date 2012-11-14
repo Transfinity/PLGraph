@@ -37,12 +37,6 @@ definitions and other extensions.  */
 %{
 %}
 
-%union {
-  char *node;
-  struct method_declarator *declarator;
-  int value;			/* For modifiers */
-}
-
 
 %pure_parser
 
@@ -102,12 +96,6 @@ definitions and other extensions.  */
 
 %token   STRING_LIT_TK   CHAR_LIT_TK        INT_LIT_TK        FP_LIT_TK
 %token   TRUE_TK         FALSE_TK           BOOL_LIT_TK       NULL_TK
-
-%type <node> ID_TK identifier name simple_name qualified_name type
- 	     primitive_type reference_type array_type formal_parameter_list
-	     formal_parameter class_or_interface_type class_type interface_type
-%type <declarator> method_declarator
-%type <value>      MODIFIER_TK
 
 %%
 /* 19.2 Production from 2.3: The Syntactic Grammar  */

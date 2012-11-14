@@ -54,13 +54,14 @@ def parse_state (graph, state_lines) :
 
 def measure (filename) :
     G = parse(filename)
-    print 'Graph info for plg file\t%s' %(filename)
-    print 'Number of nodes\t%s' %(G.number_of_nodes())
-    print 'Number of edges\t%s' %(G.number_of_edges())
-    print 'Edge density\t%s' %(G.number_of_edges() / G.number_of_nodes())
-    print 'Average clustering\t%s' %(nx.average_clustering(G.to_undirected()))
-    print 'Average shortest path length\t%s' %(nx.average_shortest_path_length(G))
-    print 'Degree correlation coef\t%s' %(nx.degree_assortativity_coefficient(G))
+    print '%s\t%s\t%s\t%s\t%s\t%s\t%s' %(
+            filename,
+            G.number_of_nodes(),
+            G.number_of_edges(),
+            G.number_of_edges() * 1.0 / G.number_of_nodes(),
+            nx.average_clustering(G.to_undirected()),
+            nx.average_shortest_path_length(G),
+            nx.degree_assortativity_coefficient(G))
     return G
 
 

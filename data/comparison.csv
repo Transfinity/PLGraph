@@ -1,14 +1,18 @@
-Language	Original Release	Age	Purpose	Typing	Object-Oriented	C-based	Paradigm	Runtime	Nodes	Edges	Edge density	Clustering coef	Mean SPL	Degree corr. coef
-C	1973	39	System programming	Static	No	Yes	Imperative	Compiled	350	2988	8	0.1332683662	1.4111256652	0.0484499705
-Java scan	1995	17	Applications	Static	Yes	Yes	Imperative	Compiled	616	6433	10	0.1325331811	2.634214972	0.0673361348
-Java full	1995	17	Applications	Static	Yes	Yes	Imperative	Compiled	787	6940	8	0.101798536	2.1098302246	0.0876182427
-R	1993	19	Numeric	Dynamic	Yes	No	Mulit	Interpreted	163	1763	10	0.1283051109	1.9842460047	0.0036017181
-Octave	1988	24	Numeric	Dynamic	Yes	No	Imperative	Interpreted	499	4681	9	0.0953699305	2.4353284883	0.0684202134
-Bash	1989	23	Scripting	Dynamic	No	No	Imperative	Interpreted	334	1545	4	0.0481169103	1.7919476363	0.5153934171
-Perl	1987	25	Scripting	Dynamic	Yes	Yes	Multi	Interpreted	449	6275	13	0.1540995017	3.4998061168	0.5757617134
-Awk	1977	35	Scripting	None	No	No	Event Driven	Interpreted	330	2497	7	0.0818747031	1.2415584416	0.2604709544
-Ruby	1995	17	Applications	Dynamic	Yes	No	Multi	Interpreted	991	17561	17	0.1053768152	1.866285458	0.5900450487
-Open Cobol	1959	53	Applications	Static	Yes	No	Imperative	Compiled	2240	6615	2	0.0635355042	0.8230904661	0.0874233951
-Q pascal	1970	42	Applications	Static	No	No	Imperative	Compiled	410	1836	4	0.0982208653	0.6513149264	0.133607306
-GNU Pascal	1970	42	Applications	Static	No	No	Imperative	Compiled	1279	12124	9	0.0494579966	1.1377512753	0.277729718
-PHP	1995	17	Web	Dynamic	Yes	No	Imperative	Compiled	983	12884	13	0.0910634796	5.0248833013	0.5861423083
+"Language"	"Version"	"Released"	"Age"	"Purpose"	"Typing"	"OO"	"C-based"	"Paradigm"	"Runtime"	"Nodes"	"Edges"	"Density"	"Clustering"	"Mean SPL"	"Deg Cor"
+"Awk"	"GNU"	1977	35	"Scripting"	"None"	"No"	"No"	"Event Driven"	"Interpreted"	324	2491	7.6882716049	0.0876969769	1.235122119	0.2551796702
+"Bash"	"GNU"	1989	23	"Scripting"	"Dynamic"	"No"	"No"	"Imperative"	"Interpreted"	334	1545	4.625748503	0.0481169103	1.7919476363	0.5153934171
+"C"	"ANSI"	1973	39	"Systems"	"Static"	"No"	"Yes"	"Imperative"	"Compiled"	350	2988	8.5371428571	0.1332683662	1.4111256652	0.0484499705
+"C"	"GCC"	1973	39	"Systems"	"Static"	"No"	"Yes"	"Imperative"	"Compiled"	854	5968	6.9882903981	0.0914002227	3.6614566031	0.217556601
+"C++"	"GCC"	1983	29	"Systems"	"Static"	"Yes"	"Yes"	"Imperative"	"Compiled"	1764	25111	14.235260771	0.0914878252	2.7862589922	0.3464785785
+"Cobol"	"Open"	1959	53	"Applications"	"Static"	"Yes"	"No"	"Imperative"	"Compiled"	2240	6615	2.953125	0.0635355042	0.8230904661	0.0874233951
+"Cobol"	"Tiny"	1959	53	"Applications"	"Static"	"Yes"	"No"	"Imperative"	"Compiled"	1851	9107	4.9200432199	0.0500297147	0.581001942	-0.2920350647
+"Java"	"GCC full"	1995	17	"Applications"	"Static"	"Yes"	"Yes"	"Imperative"	"Compiled"	775	6928	8.9393548387	0.1037894576	1.9674651996	0.0822185545
+"Java"	"GCC scan"	1995	17	"Applications"	"Static"	"Yes"	"Yes"	"Imperative"	"Compiled"	607	6424	10.5831960461	0.1353559893	2.5049341837	0.0626263143
+"ObjectiveC"	"GCC"	1983	29	"Applications"	"Static"	"Yes"	"Yes"	"Imperative"	"Compiled"	1105	8710	7.8823529412	0.0950050569	2.8240064922	0.2634594456
+"Octave"	"GNU"	1988	24	"Numeric"	"Dynamic"	"Yes"	"No"	"Imperative"	"Interpreted"	499	4681	9.3807615231	0.0953699305	2.4353284883	0.0684202134
+"Pascal"	"GNU"	1970	42	"Applications"	"Static"	"No"	"No"	"Imperative"	"Compiled"	1229	13500	10.9845402766	0.0443476084	0.8442061155	0.1634301154
+"Pascal"	"Q"	1970	42	"Applications"	"Static"	"No"	"No"	"Imperative"	"Compiled"	410	1836	4.4780487805	0.0982208653	0.6513149264	0.133607306
+"Perl"	"Standard"	1987	25	"Scripting"	"Dynamic"	"Yes"	"Yes"	"Multi"	"Interpreted"	439	6265	14.271070615	0.1583709306	3.4802373597	0.5709539556
+"PHP"	"Standard"	1995	17	"Web"	"Dynamic"	"Yes"	"No"	"Imperative"	"Compiled"	910	14743	16.2010989011	0.1049075046	3.8384301068	0.4223188626
+"R"	"Standard"	1993	19	"Numeric"	"Dynamic"	"Yes"	"No"	"Mulit"	"Interpreted"	163	1763	10.8159509202	0.1283051109	1.9842460047	0.0036017181
+"Ruby"	"Standard"	1995	17	"Applications"	"Dynamic"	"Yes"	"No"	"Multi"	"Interpreted"	958	18098	18.891440501	0.1279675015	1.55671647	0.5756758206
