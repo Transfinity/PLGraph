@@ -56,3 +56,10 @@ I don't really know what I need to know, is the thing.  How can I decide what te
 And right now I don't have a hypothesis.  Which is partly because I don't know the data, but it's partly because I don't know what I want to know.
 
 So the question is: is there any useful information contained in the transition graph of a language?  How does the high-level design of the language affect the graphs, and (eventually) how does this change the compiler.  And perhaps most importantly, is there more variation between different languages than there is between different implementations of the same language?
+
+11/14/12
+    I experimented with removing all the semantic actions from the .y file.  This produces a perfectly usable file that bison is able to read and turn into a PLgraph.
+    One tricky bit is the semantic actions add dummy nodes to the graph.  These are obviously implementation dependant.  Still, they might qualify as important.  I think the thing to do would be to remove ALL semantic actions from all of the yacc files, just to get some consistancy.
+    In order to remove said SAs, I used vim's search and replace feature, with the command 
+    :%s/\([^`']\){\_[^}{]*}/\1/gc
+    This searches for all closed brackt segments, not proceeded by a tick or backtick, with no interior blocks.  Pretty cool, I know.  Before you use it, you have to remove all the junk at the top and bottom of the file, basically everything but the token definitions (which are required).

@@ -23,6 +23,285 @@
 %verbose
 
 %{
+#include "config.h"
+
+#include <stdlib.h>
+#include <string.h>
+
+#include "cobc.h"
+#include "tree.h"
+
+#define yyerror			cb_error
+#define YYDEBUG			1
+#define YYERROR_VERBOSE		1
+
+#define PENDING(x)		cb_warning (_("'%s' not implemented"), x)
+
+#define emit_statement(x) \
+  current_program->exec_list = cb_cons (x, current_program->exec_list)
+
+#define push_expr(type, node) \
+  current_expr = cb_build_list (cb_int (type), node, current_expr)
+
+#define TERM_NONE		0
+#define TERM_ACCEPT		1
+#define TERM_ADD		2
+#define TERM_CALL		3
+#define TERM_COMPUTE		4
+#define TERM_DELETE		5
+#define TERM_DISPLAY		6
+#define TERM_DIVIDE		7
+#define TERM_EVALUATE		8
+#define TERM_IF			9
+#define TERM_MULTIPLY		10
+#define TERM_PERFORM		11
+#define TERM_READ		12
+#define TERM_RECEIVE		13
+#define TERM_RETURN		14
+#define TERM_REWRITE		15
+#define TERM_SEARCH		16
+#define TERM_START		17
+#define TERM_STRING		18
+#define TERM_SUBTRACT		19
+#define TERM_UNSTRING		20
+#define TERM_WRITE		21
+#define TERM_MAX		22
+
+/* Global variables */
+
+struct cb_program		*current_program = NULL;
+struct cb_statement		*current_statement = NULL;
+struct cb_label			*current_section = NULL;
+struct cb_label			*current_paragraph = NULL;
+size_t				functions_are_all = 0;
+int				non_const_word = 0;
+
+/* Local variables */
+
+static struct cb_statement	*main_statement;
+
+static cb_tree			current_expr;
+static struct cb_field		*current_field;
+static struct cb_field		*description_field;
+static struct cb_file		*current_file;
+
+static enum cb_storage		current_storage;
+
+static size_t			check_unreached = 0;
+static int			call_mode;
+static int			size_mode;
+
+static cb_tree			perform_stack = NULL;
+static cb_tree			qualifier = NULL;
+
+static cb_tree			fgc;
+static cb_tree			bgc;
+static cb_tree			scroll;
+static cb_tree			save_tree_1;
+static cb_tree			save_tree_2;
+static cb_tree			dummy_tree;
+static size_t			in_declaratives = 0;
+static size_t			current_linage = 0;
+static size_t			prog_end = 0;
+static size_t			use_global_ind = 0;
+static size_t			samearea = 1;
+static size_t			organized_seen = 0;
+static size_t			inspect_keyword = 0;
+static int			next_label_id = 0;
+static int			eval_level = 0;
+static int			eval_inc = 0;
+static int			eval_inc2 = 0;
+static int			depth = 0;
+static int			dispattrs = 0;
+static struct cb_file		*linage_file;
+static cb_tree			next_label_list = NULL;
+static char			*stack_progid[32];
+static int			term_array[TERM_MAX];
+static int			eval_check[64][64];
+
+/* Static functions */
+
+static void
+BEGIN_STATEMENT (const char *name, const size_t term)
+{
+	if (cb_warn_unreachable && check_unreached) {
+		cb_warning (_("Unreachable statement"));
+	}
+	current_statement = cb_build_statement ((char *)name);
+	CB_TREE (current_statement)->source_file = (unsigned char *)cb_source_file;
+	CB_TREE (current_statement)->source_line = cb_source_line;
+	emit_statement (CB_TREE (current_statement));
+	if (term) {
+		term_array[term]++;
+	}
+	main_statement = current_statement;
+}
+
+static void
+BEGIN_IMPLICIT_STATEMENT (void)
+{
+	current_statement = cb_build_statement (NULL);
+	main_statement->body = cb_list_add (main_statement->body,
+					    CB_TREE (current_statement));
+}
+
+static void
+emit_entry (const char *name, const int encode, cb_tree using_list)
+{
+	cb_tree		l;
+	cb_tree		label;
+	cb_tree		x;
+	struct cb_field	*f;
+	int		parmnum;
+	char		buff[256];
+
+	sprintf (buff, "E$%s", name);
+	label = cb_build_label (cb_build_reference (buff), NULL);
+	if (encode) {
+		CB_LABEL (label)->name = (unsigned char *)(cb_encode_program_id (name));
+		CB_LABEL (label)->orig_name = (unsigned char *)name;
+	} else {
+		CB_LABEL (label)->name = (unsigned char *)name;
+		CB_LABEL (label)->orig_name = (unsigned char *)current_program->orig_source_name;
+	}
+	CB_LABEL (label)->need_begin = 1;
+	CB_LABEL (label)->is_entry = 1;
+	emit_statement (label);
+
+	parmnum = 1;
+	for (l = using_list; l; l = CB_CHAIN (l)) {
+		x = CB_VALUE (l);
+		if (x != cb_error_node && cb_ref (x) != cb_error_node) {
+			f = CB_FIELD (cb_ref (x));
+			if (f->level != 01 && f->level != 77) {
+				cb_error_x (x, _("'%s' not level 01 or 77"), cb_name (x));
+			}
+			if (!current_program->flag_chained) {
+				if (f->storage != CB_STORAGE_LINKAGE) {
+					cb_error_x (x, _("'%s' is not in LINKAGE SECTION"), cb_name (x));
+				}
+				if (f->flag_item_based || f->flag_external) {
+					cb_error_x (x, _("'%s' can not be BASED/EXTERNAL"), cb_name (x));
+				}
+				f->flag_is_pdiv_parm = 1;
+			} else {
+				if (f->storage != CB_STORAGE_WORKING) {
+					cb_error_x (x, _("'%s' is not in WORKING-STORAGE SECTION"), cb_name (x));
+				}
+				f->flag_chained = 1;
+				f->param_num = parmnum;
+				parmnum++;
+			}
+			if (f->redefines) {
+				cb_error_x (x, _("'%s' REDEFINES field not allowed here"), cb_name (x));
+			}
+		}
+	}
+
+	/* Check dangling LINKAGE items */
+	if (cb_warn_linkage) {
+		for (f = current_program->linkage_storage; f; f = f->sister) {
+			for (l = using_list; l; l = CB_CHAIN (l)) {
+				x = CB_VALUE (l);
+				if (x != cb_error_node && cb_ref (x) != cb_error_node) {
+					if (f == CB_FIELD (cb_ref (x))) {
+						break;
+					}
+				}
+			}
+			if (!l && !f->redefines) {
+				cb_warning (_("LINKAGE item '%s' is not a PROCEDURE USING parameter"), f->name);
+			}
+		}
+	}
+
+	for (l = current_program->entry_list; l; l = CB_CHAIN (l)) {
+		if (strcmp ((const char *)name, (const char *)(CB_LABEL(CB_PURPOSE(l))->name)) == 0) {
+			cb_error_x (CB_TREE (current_statement), _("ENTRY '%s' duplicated"), name);
+		}
+	}
+
+	current_program->entry_list = cb_list_append (current_program->entry_list,
+							cb_build_pair (label, using_list));
+}
+
+static void
+terminator_warning (const size_t termid)
+{
+	check_unreached = 0;
+	if (cb_warn_terminator && term_array[termid]) {
+		cb_warning_x (CB_TREE (current_statement),
+			_("%s statement not terminated by END-%s"),
+			current_statement->name, current_statement->name);
+	}
+	if (term_array[termid]) {
+		term_array[termid]--;
+	}
+}
+
+static void
+terminator_error (void)
+{
+	check_unreached = 0;
+	cb_error_x (CB_TREE (current_statement),
+			_("%s statement not terminated by END-%s"),
+			current_statement->name, current_statement->name);
+}
+
+static void
+terminator_clear (const size_t termid)
+{
+	check_unreached = 0;
+	if (term_array[termid]) {
+		term_array[termid]--;
+	}
+}
+
+static int
+literal_value (cb_tree x)
+{
+	if (x == cb_space) {
+		return ' ';
+	} else if (x == cb_zero) {
+		return '0';
+	} else if (x == cb_quote) {
+		return '"';
+	} else if (x == cb_null) {
+		return 0;
+	} else if (CB_TREE_CLASS (x) == CB_CLASS_NUMERIC) {
+		return cb_get_int (x);
+	} else {
+		return CB_LITERAL (x)->data[0];
+	}
+}
+
+static void
+setup_use_file (struct cb_file *fileptr)
+{
+	struct cb_file	*newptr;
+
+	if (fileptr->organization == COB_ORG_SORT) {
+		cb_error (_("USE statement invalid for SORT file"));
+	}
+	if (fileptr->global) {
+		newptr = cobc_malloc (sizeof(struct cb_file));
+		*newptr = *fileptr;
+		newptr->handler = current_section;
+		newptr->handler_prog = current_program;
+		if (!use_global_ind) {
+			current_program->local_file_list =
+				cb_list_add (current_program->local_file_list,
+					     CB_TREE (newptr));
+		} else {
+			current_program->global_file_list =
+				cb_list_add (current_program->global_file_list,
+					     CB_TREE (newptr));
+		}
+	} else {
+		fileptr->handler = current_section;
+	}
+}
+
 %}
 
 %token TOKEN_EOF 0 "end of file"
