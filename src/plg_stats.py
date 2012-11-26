@@ -36,11 +36,36 @@ def doublize(sarr) :
         darr.append(float(elem))
     return darr
 
-def plot_fit(data, x_key, y_key) :
+def sort_by(data, key) :
+    # Figure out what type of thing we have
+    try :
+        int(data[0][key])
+        elem_type = int
+    except ValueError :
+        try :
+            float(data[0][key])
+            elem_type = float
+        except ValueError :
+            elem_type = str
+
+    elements = []
+    for point in data :
+        elements.append((elem_type(point[key]), point['Language']))
+
+    elements.sort()
+
+    return elements
+
+def plot_fit(data, x_key, y_key, highlight=None) :
     import matplotlib.pyplot as plt
     import scipy.stats as sst
     from scipy import optimize
     import numpy as np
+
+    if highlight == None :
+        highlight = []
+    elif isinstance(highlight, str) :
+        highlight = [highlight]
 
     x, y = extract_vals(data, x_key, y_key)
     x = np.array(doublize(x))
@@ -62,6 +87,14 @@ def plot_fit(data, x_key, y_key) :
     plt.ylabel(y_key)
 
     plt.plot(x, y, "rx", x, fitfunc(p1, x), 'b-')
+
+    # Draw highlighted points
+    for point in data :
+        if point['Language'] in highlight :
+            plt.plot(point[x_key], point[y_key], 'go')
+            # TODO: add a label
+
+    # Draw the legend
     x_coord = (x.max() - x.min()) * 3 / 4 + x.min()
     y_coord = (y.max() - y.min()) * 5 / 6 + y.min()
     plt.text(x_coord, y_coord, 'Pearson r = %.2f\nP value = %.2f' %(r, p))
@@ -77,12 +110,22 @@ def anova_oneway (data, val_key, group_key, treatment_group=None) :
 
     # First we must divide up the groups
     groups = {}
-    for vector in data :
-        if vector[group_key] not in groups.keys() :
-            print 'Found new group:', vector[group_key]
-            groups[vector[group_key]] = []
 
-        groups[vector[group_key]].append(vector[val_key])
+    if treatment_group == None :
+        for vector in data :
+            if vector[group_key] not in groups.keys() :
+                print 'Found new group:', vector[group_key]
+                groups[vector[group_key]] = []
+
+            groups[vector[group_key]].append(vector[val_key])
+    else :
+        groups[treatment_group] = []
+        groups['other'] = []
+        for vector in data :
+            if vector[group_key] == treatment_group :
+                groups[treatment_group].append(vector[val_key])
+            else :
+                groups['other'].append(vector[val_key])
 
     for g in groups.keys() :
         groups[g] = np.array(doublize(groups[g]))

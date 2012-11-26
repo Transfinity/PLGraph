@@ -63,3 +63,5 @@ So the question is: is there any useful information contained in the transition 
     In order to remove said SAs, I used vim's search and replace feature, with the command 
     :%s/\([^`']\){\_[^}{]*}/\1/gc
     This searches for all closed brackt segments, not proceeded by a tick or backtick, with no interior blocks.  Pretty cool, I know.  Before you use it, you have to remove all the junk at the top and bottom of the file, basically everything but the token definitions (which are required).
+
+    /n/n[a-z0-9_]\+\s*\n\+\s*:
