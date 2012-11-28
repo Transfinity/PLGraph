@@ -27,8 +27,20 @@ def parse_file(name='../yacc_files/ansi_c.y') :
     i += 1
 
     while lines[i].strip() != '%%' :
-        if lines[i].strip().isspace() or lines[i].strip() == '' :
+        line = lines[i].strip()
+        if line.isspace() or line == '' :
             continue
+
+        # Must be the begining of a definition
+        current_nt = line.split(':')[0]
+        print 'Processing definition of nonterminal', current_nt
+
+        if current_nt not in nonterminals :
+            nonterminals.append(current_nt)
+        else :
+            print 'Problem: repeat definition of nonterminal', current_nt
+
+
 
 
 
