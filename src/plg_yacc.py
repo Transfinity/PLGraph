@@ -1,5 +1,20 @@
 import re
-PATTERN = re.compile(r'''((?:[^\s"']|"[^"]*"|'[^']*')+)''')
+NT_LIST = re.compile(r'''((?:[^\s"']|"[^"]*"|'[^']*')+)''')
+C_COMMENT = re.compile(r'''(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/)|(//.*)''')
+
+class NonTerminal :
+    name = ''
+    rules = 0
+    references = 0
+
+    def __init__ (self, name) :
+        self.name = name
+
+    def __str__ (self) :
+        return self.name
+
+    def __eq__ (self, other) :
+        return self.name == other.name
 
 def parse_tokens (line) :
     if line.startswith('%token') :
@@ -26,28 +41,19 @@ def parse_file(name='../yacc_files/ansi_c.y') :
     # Skip the %% line
     i += 1
 
-    while lines[i].strip() != '%%' :
-        line = lines[i].strip()
-        if line.isspace() or line == '' :
+    for i in range(i, len(lines)) :
+        if lines[i].strip() == '%%' :
+            break
+
+        if  (   lines[i].strip().isspace()
+                or  lines[i].strip()
+                or  C_COMMENT.match(lines[i]) == '' ) :
             continue
 
-        # Must be the begining of a definition
-        current_nt = line.split(':')[0]
-        print 'Processing definition of nonterminal', current_nt
+        print 'Processing line %s' %lines[i]
 
-        if current_nt not in nonterminals :
-            nonterminals.append(current_nt)
-        else :
-            print 'Problem: repeat definition of nonterminal', current_nt
-
-
-
-
-
-    print PATTERN.split(data)[1::2]
-
-
-
-
-
-
+        if not lines[i].startswith(':') and not lines[i].startswith('|') :
+            current_nt = NonTerminal(lines[i].split(':')[0].strip())
+            print 'Found non-terminal: %s' %current_nt
+            if current_nt in nonterminals :
+                print 'Problem: non-terminal %s defined more than once!' %nt.name
