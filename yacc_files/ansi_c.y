@@ -20,7 +20,9 @@ primary_expression
 	| '(' expression ')'
 	;
 
-postfix_expression
+
+
+postfix_expression/* This is a C comment */
 	: primary_expression
 	| postfix_expression '[' expression ']'
 	| postfix_expression '(' ')'

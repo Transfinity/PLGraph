@@ -91,21 +91,15 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    The value is an integer because, if used, it is the tree code
    to use in the expression made from the operator.  */
 
-%right <code> ASSIGN '='
-%right <code> '?' ':'
-%left <code> OROR
-%left <code> ANDAND
-%left <code> '|'
-%left <code> '^'
-%left <code> '&'
-%left <code> EQCOMPARE
-%left <code> ARITHCOMPARE
-%left <code> LSHIFT RSHIFT
-%left <code> '+' '-'
-%left <code> '*' '/' '%'
-%right <code> UNARY PLUSPLUS MINUSMINUS
-%left HYPERUNARY
-%left <code> POINTSAT '.' '(' '['
+%token ASSIGN
+%token OROR
+%token ANDAND
+%token EQCOMPARE
+%token ARITHCOMPARE
+%token LSHIFT RSHIFT
+%token UNARY PLUSPLUS MINUSMINUS
+%token HYPERUNARY
+%token POINTSAT
 
 /* The Objective-C keywords.  These are included in C and in
    Objective C, so that the token codes are the same in both.  */
@@ -224,27 +218,27 @@ nonnull_exprlist:
 
 unary_expr:
 	primary
-	| '*' cast_expr   %prec UNARY
+	| '*' cast_expr   
 		
 	/* __extension__ turns off -pedantic for following primary.  */
-	| extension cast_expr	  %prec UNARY
+	| extension cast_expr	  
 		
-	| unop cast_expr  %prec UNARY
+	| unop cast_expr  
 		
 	/* Refer to the address of a label as a pointer.  */
 	| ANDAND identifier
 		
-	| sizeof unary_expr  %prec UNARY
+	| sizeof unary_expr  
 		
-	| sizeof '(' typename ')'  %prec HYPERUNARY
+	| sizeof '(' typename ')'  
 		
-	| alignof unary_expr  %prec UNARY
+	| alignof unary_expr  
 		
-	| alignof '(' typename ')'  %prec HYPERUNARY
+	| alignof '(' typename ')'  
 		
-	| REALPART cast_expr %prec UNARY
+	| REALPART cast_expr 
 		
-	| IMAGPART cast_expr %prec UNARY
+	| IMAGPART cast_expr 
 		
 	;
 
@@ -262,7 +256,7 @@ typeof:
 
 cast_expr:
 	unary_expr
-	| '(' typename ')' cast_expr  %prec UNARY
+	| '(' typename ')' cast_expr  
 		
 	;
 
@@ -326,7 +320,7 @@ primary:
 		
 	| '(' typename ')' '{'
 		
-	  initlist_maybe_comma '}'  %prec UNARY
+	  initlist_maybe_comma '}'  
 		
 	| '(' expr ')'
 		
@@ -336,7 +330,7 @@ primary:
                  
 	| compstmt_primary_start error ')'
 		
-	| primary '(' exprlist ')'   %prec '.'
+	| primary '(' exprlist ')'   
 		
 	| VA_ARG '(' expr_no_commas ',' typename ')'
 		
@@ -345,7 +339,7 @@ primary:
 		
       | TYPES_COMPATIBLE_P '(' typename ',' typename ')'
 		
-	| primary '[' expr ']'   %prec '.'
+	| primary '[' expr ']'   
 		
 	| primary '.' identifier
 		
@@ -1029,13 +1023,13 @@ declarator:
 after_type_declarator:
 	  '(' maybe_attribute after_type_declarator ')'
 		
-	| after_type_declarator '(' parmlist_or_identifiers  %prec '.'
+	| after_type_declarator '(' parmlist_or_identifiers  
 		
-/*	| after_type_declarator '(' error ')'  %prec '.'
+/*	| after_type_declarator '(' error ')'  
 		  */
-	| after_type_declarator array_declarator  %prec '.'
+	| after_type_declarator array_declarator  
 		
-	| '*' maybe_type_quals_attrs after_type_declarator  %prec UNARY
+	| '*' maybe_type_quals_attrs after_type_declarator  
 		
 	| TYPENAME
 	;
@@ -1050,25 +1044,25 @@ parm_declarator:
 	;
 
 parm_declarator_starttypename:
-	  parm_declarator_starttypename '(' parmlist_or_identifiers  %prec '.'
+	  parm_declarator_starttypename '(' parmlist_or_identifiers  
 		
-/*	| parm_declarator_starttypename '(' error ')'  %prec '.'
+/*	| parm_declarator_starttypename '(' error ')'  
 		  */
-	| parm_declarator_starttypename array_declarator  %prec '.'
+	| parm_declarator_starttypename array_declarator  
 		
 	| TYPENAME
 	;
 
 parm_declarator_nostarttypename:
-	  parm_declarator_nostarttypename '(' parmlist_or_identifiers  %prec '.'
+	  parm_declarator_nostarttypename '(' parmlist_or_identifiers  
 		
-/*	| parm_declarator_nostarttypename '(' error ')'  %prec '.'
+/*	| parm_declarator_nostarttypename '(' error ')'  
 		  */
-	| parm_declarator_nostarttypename array_declarator  %prec '.'
+	| parm_declarator_nostarttypename array_declarator  
 		
-	| '*' maybe_type_quals_attrs parm_declarator_starttypename  %prec UNARY
+	| '*' maybe_type_quals_attrs parm_declarator_starttypename  
 		
-	| '*' maybe_type_quals_attrs parm_declarator_nostarttypename  %prec UNARY
+	| '*' maybe_type_quals_attrs parm_declarator_nostarttypename  
 		
 	| '(' maybe_attribute parm_declarator_nostarttypename ')'
 		
@@ -1078,15 +1072,15 @@ parm_declarator_nostarttypename:
    an explicit typespec.  These cannot redeclare a typedef-name.  */
 
 notype_declarator:
-	  notype_declarator '(' parmlist_or_identifiers  %prec '.'
+	  notype_declarator '(' parmlist_or_identifiers  
 		
-/*	| notype_declarator '(' error ')'  %prec '.'
+/*	| notype_declarator '(' error ')'  
 		  */
 	| '(' maybe_attribute notype_declarator ')'
 		
-	| '*' maybe_type_quals_attrs notype_declarator  %prec UNARY
+	| '*' maybe_type_quals_attrs notype_declarator  
 		
-	| notype_declarator array_declarator  %prec '.'
+	| notype_declarator array_declarator  
 		
 	| IDENTIFIER
 	;
@@ -1507,7 +1501,7 @@ select_or_iter_stmt:
 		
 	  c99_block_lineno_labeled_stmt
                 
-	| simple_if %prec IF
+	| simple_if 
 		
 /* Make sure c_expand_end_cond is run once
    for each call to c_expand_start_cond.
