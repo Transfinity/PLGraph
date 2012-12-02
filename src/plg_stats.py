@@ -17,23 +17,44 @@ def load_lang_data(path='../data/comparison.csv') :
     return labeled_data
 
 
-def extract_vals(data, x_key, y_key) :
+def extract_vals(data, keys) :
     """ data should be a list of dictionaries, x_key and y_key
-    are the two keys to parse with. The values will be sorted by
-    x value """
+    are the two keys to parse with. """
+    import numpy as np
 
-    x = []
-    y = []
+    values = {}
+    for key in keys :
+        values[key] = []
+
     for vector in data :
-        x.append(vector[x_key])
-        y.append(vector[y_key])
+        for key in keys :
+            if vector[key] == 'NA' :
+                values[key].append(None)
+            elif vector[key] == 'Yes' :
+                values[key].append(1.0)
+            elif vector[key] == 'No' :
+                values[key].append(0.0)
+            else :
+                try :
+                    val = float(vector[key])
+                    values[key].append(val)
+                except ValueError :
+                    values[key].append(vector[key])
 
-    return zip(*sorted(zip(x, y)))
+    for key in keys :
+        values[key] = np.array(values[key])
+
+    return values
 
 def doublize(sarr) :
     darr = []
     for elem in sarr :
-        darr.append(float(elem))
+        if elem == 'Yes' :
+            darr.append(1.0)
+        elif elem == 'No' :
+            darr.append(0.0)
+        else :
+            darr.append(float(elem))
     return darr
 
 def sort_by(data, key) :
@@ -67,9 +88,9 @@ def plot_fit(data, x_key, y_key, highlight=None) :
     elif isinstance(highlight, str) :
         highlight = [highlight]
 
-    x, y = extract_vals(data, x_key, y_key)
-    x = np.array(doublize(x))
-    y = np.array(doublize(y))
+    values = extract_vals(data, [x_key, y_key])
+    x = values[x_key]
+    y = values[y_key]
 
     fitfunc = lambda p, x: p[0]*x + p[1]
     errfunc = lambda p, x, y: fitfunc(p, x) - y
@@ -99,6 +120,32 @@ def plot_fit(data, x_key, y_key, highlight=None) :
     y_coord = (y.max() - y.min()) * 5 / 6 + y.min()
     plt.text(x_coord, y_coord, 'Pearson r = %.2f\nP value = %.2f' %(r, p))
     plt.show()
+
+def mlr(data, dependent_key, independent_keys=None) :
+    import ols
+    import numpy as np
+
+    if independent_keys == None:
+        independent_keys = ['Age', 'CapersJones', 'Popularity',
+                'C-based', 'OO', 'Compiled', 'DynamicTyping']
+
+    all_keys = [dependent_key]
+    all_keys.extend(independent_keys)
+
+    values = extract_vals(data, all_keys)
+
+    print 'Values extracted, printing'
+    print values
+
+    y = values[dependent_key]
+
+    x = []
+    for key in independent_keys :
+        x.append(values[key])
+    x = np.array(x)
+
+    model = ols.ols(y, x, dependent_key, independent_keys)
+    model.summary()
 
 def anova_oneway (data, val_key, group_key, treatment_group=None) :
     """ performs a 1-way anova (equivalent to a student's t-test for
