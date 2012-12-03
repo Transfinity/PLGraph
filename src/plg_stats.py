@@ -16,35 +16,38 @@ def load_lang_data(path='../data/comparison.csv') :
 
     return labeled_data
 
+def remove_lang(data, lang) :
+    rtn = []
+    for vector in data :
+        if vector['Language'] != lang :
+            rtn.append(vector)
+    return rtn
 
 def extract_vals(data, keys) :
     """ data should be a list of dictionaries, x_key and y_key
     are the two keys to parse with. """
     import numpy as np
 
-    values = {}
-    for key in keys :
-        values[key] = []
-
+    values = []
     for vector in data :
+        row = []
         for key in keys :
             if vector[key] == 'NA' :
-                values[key].append(None)
+                row.append(None)
             elif vector[key] == 'Yes' :
-                values[key].append(1.0)
+                row.append(1.0)
             elif vector[key] == 'No' :
-                values[key].append(0.0)
+                row.append(0.0)
             else :
                 try :
                     val = float(vector[key])
-                    values[key].append(val)
+                    row.append(val)
                 except ValueError :
-                    values[key].append(vector[key])
+                    row.append(vector[key])
 
-    for key in keys :
-        values[key] = np.array(values[key])
+        values.append(np.array(row))
 
-    return values
+    return np.array(values)
 
 def doublize(sarr) :
     darr = []
@@ -57,7 +60,7 @@ def doublize(sarr) :
             darr.append(float(elem))
     return darr
 
-def sort_by(data, key) :
+def sort_by(data, key, extras=[]) :
     # Figure out what type of thing we have
     try :
         int(data[0][key])
@@ -71,7 +74,10 @@ def sort_by(data, key) :
 
     elements = []
     for point in data :
-        elements.append((elem_type(point[key]), point['Language']))
+        tup = (elem_type(point[key]), point['Language'])
+        for extra_key in extras :
+            tup += (point[extra_key],)
+        elements.append(tup)
 
     elements.sort()
 
@@ -89,8 +95,8 @@ def plot_fit(data, x_key, y_key, highlight=None) :
         highlight = [highlight]
 
     values = extract_vals(data, [x_key, y_key])
-    x = values[x_key]
-    y = values[y_key]
+    x = values[:,0]
+    y = values[:,1]
 
     fitfunc = lambda p, x: p[0]*x + p[1]
     errfunc = lambda p, x, y: fitfunc(p, x) - y
@@ -126,25 +132,27 @@ def mlr(data, dependent_key, independent_keys=None) :
     import numpy as np
 
     if independent_keys == None:
-        independent_keys = ['Age', 'CapersJones', 'Popularity',
+        independent_keys = ['Age', # 'CapersJones', 'Popularity',
                 'C-based', 'OO', 'Compiled', 'DynamicTyping']
 
     all_keys = [dependent_key]
     all_keys.extend(independent_keys)
 
     values = extract_vals(data, all_keys)
+    y = values[:,0]
+    x = values[:,1:]
 
-    print 'Values extracted, printing'
-    print values
+    try :
+        model = ols.ols(y, x, dependent_key, independent_keys)
+    except Exception :
+        print 'Encountered a LinAlgError!'
+        print 'dumping values...'
+        print '\ny values'
+        print y
+        print '\nx values'
+        print x
+        raise
 
-    y = values[dependent_key]
-
-    x = []
-    for key in independent_keys :
-        x.append(values[key])
-    x = np.array(x)
-
-    model = ols.ols(y, x, dependent_key, independent_keys)
     model.summary()
 
 def anova_oneway (data, val_key, group_key, treatment_group=None) :
@@ -159,6 +167,7 @@ def anova_oneway (data, val_key, group_key, treatment_group=None) :
     groups = {}
 
     if treatment_group == None :
+        pylab.title('%s grouped by %s' %(val_key, group_key))
         for vector in data :
             if vector[group_key] not in groups.keys() :
                 print 'Found new group:', vector[group_key]
@@ -166,11 +175,12 @@ def anova_oneway (data, val_key, group_key, treatment_group=None) :
 
             groups[vector[group_key]].append(vector[val_key])
     else :
-        groups[treatment_group] = []
+        pylab.title('%s with and without treatment %s for %s' %(val_key, treatment_group, group_key))
+        groups['treatment'] = []
         groups['other'] = []
         for vector in data :
-            if vector[group_key] == treatment_group :
-                groups[treatment_group].append(vector[val_key])
+            if vector[group_key] in treatment_group :
+                groups['treatment'].append(vector[val_key])
             else :
                 groups['other'].append(vector[val_key])
 
