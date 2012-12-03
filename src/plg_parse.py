@@ -3,6 +3,23 @@
 import networkx as nx
 import logging
 
+class Literal :
+    name = ''
+    rules = 0
+    references = 0
+
+    def __init__ (self, name) :
+        self.name = name
+
+    def __str__ (self) :
+        return self.name
+
+    def __eq__ (self, other) :
+        return self.name == other.name
+
+def is_empty(line) :
+    return line.isspace() or line == ''
+
 def is_state_start (line) :
     line = line.split()
     return len(line) == 2 and line[0] == 'state' and line[1].isdigit()
@@ -10,7 +27,69 @@ def is_state_start (line) :
 def parse (filename) :
     graph = nx.DiGraph()
     lines = open(filename).readlines()
-    for i in range(0, len(lines)) :
+    i = 0
+
+    # Skip lines until we get to the terminal list
+    while not lines[i].startswith('Terminals, with rules where they appear') :
+        i += 1
+
+    # Skip the delimiting line
+    i += 1
+
+    # Parse terminals
+    terminals = []
+    while not lines[i].startswith('Nonterminals, with rules where they appear') :
+        if is_empty(lines[i]) :
+            i += 1
+            continue
+
+        # parse the initial line "TERM (id) ref ref..."
+        line = lines[i].split()
+        term = Literal(line[0])
+        term.references = len(line[2:])
+
+        # parse trailing lines of reference numbers "    ref ref ref..."
+        i += 1
+        while lines[i].startswith('    ') :
+            term.references += len(lines[i].split())
+            i += 1
+
+        terminals.append(term)
+
+    # Skip the delimiting line
+    i += 1
+
+
+    # Parse nonterminals
+    nonterminals = []
+    while not is_state_start(lines[i]) :
+        if is_empty(lines[i]) :
+            i += 1
+            continue
+
+        # Parse the initial line "nt_name (id)"
+        line = lines[i].split()
+        nt = Literal(line[0])
+        i += 1
+
+        # Parse subsequent lines "on left: ref ref...ref, on right: ref ref..."
+        tail = ''
+        while(lines[i].startswith('    ')) :
+            tail += lines[i]
+            i += 1
+
+        if nt.name == '$accept' :
+            continue
+
+        tail = tail.split('on right:')
+        rules = tail[0].strip('    on left: ').split()
+        nt.rules = len(rules)
+        refs = tail[1].split()
+        nt.references = len(refs)
+
+        nonterminals.append(nt)
+
+    for i in range(i, len(lines)) :
         line = lines[i]
         if not is_state_start(line) :
             continue
@@ -26,11 +105,11 @@ def parse (filename) :
             else :
                 state_lines.append(line)
 
-        parse_state(graph, state_lines)
+        read_state(graph, state_lines)
 
-    return graph
+    return graph, terminals, nonterminals
 
-def parse_state (graph, state_lines) :
+def read_state (graph, state_lines) :
     state_id = int(state_lines[0].split()[1])
     graph.add_node(state_id)
 
@@ -53,9 +132,37 @@ def parse_state (graph, state_lines) :
         log.debug('state %s is a leaf!' %(state_id))
 
 def measure (filename) :
-    G = parse(filename)
-    print '%s\t%s\t%s\t%s\t%s\t%s\t%s' %(
+    import table_printer as tp
+    from collections import namedtuple
+    G, terminals, nonterminals = parse(filename)
+
+    """
+    print '%s terminals, sorted by ref count:' %len(terminals)
+    rows = []
+    Row = namedtuple('Row', ['name', 'referenced'])
+    for tok in terminals :
+        rows.append(Row("'%s'" %tok.name, tok.references))
+    rows.sort(key=lambda x: -x[1])
+    tp.print_table(rows)
+
+    print '\n%d nonterminals, sorted by num rules:' %len(nonterminals)
+    rows = []
+    Row = namedtuple('Row', ['name', 'rules', 'referenced'])
+    for nt in nonterminals :
+        rows.append(Row(nt.name, nt.rules, nt.references))
+    rows.sort(key=lambda x: -x[1])
+    tp.print_table(rows)
+    """
+
+    num_rules = 0
+    for nt in nonterminals :
+        num_rules += nt.rules
+
+    print '\n%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s' %(
             filename,
+            len(terminals),
+            len(nonterminals),
+            num_rules,
             G.number_of_nodes(),
             G.number_of_edges(),
             G.number_of_edges() * 1.0 / G.number_of_nodes(),
